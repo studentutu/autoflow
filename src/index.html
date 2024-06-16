@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AutoWorkflow</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" />
+  <link rel="stylesheet" href="./index.css" />
+  <script defer src="./Renderer/renderer.js"></script>
+</head>
+
+<body>
+
+  <h1>Welcome to AutoWorkflow!</h1>
+
+  <div id="drop-zone">
+    <span>Drop File Here</span>
+    <input id="fileInput" type="file" accept=".json">
+  </div>
+
+  <button id="startBtn" class="button is-primary">Start</button>
+  <button id="stopBtn" class="button is-warning">Stop</button>
+  </br>
+  <span id="last-mouse-click">Last mouse click: </span>
+
+  </br>
+  </br>
+  </br>
+
+  <section class="container">
+    <button id="opencv-btn" class="button is-danger">
+      Test OpenCV
+    </button>
+  </section>
+
+  </br>
+  <div class="container is-justify-content-center">
+    <div class="file is-boxed">
+      <label class="file-label">
+        <input id="opencv-target" class="file-input" type="file" />
+        <span class="file-cta">
+          <span class="file-icon">
+            <i class="fas fa-upload"></i>
+          </span>
+          <span class="file-label"> Choose a target </span>
+        </span>
+        <span class="file-name"> Screen Shot 2017-07-29 at 15.54.25.png </span>
+      </label>
+    </div>
+    </br>
+
+    </br>
+    <div class="file is-boxed">
+      <label class="file-label">
+        <input id="opencv-screenshot" class="file-input" type="file" />
+        <span class="file-cta">
+          <span class="file-icon">
+            <i class="fas fa-upload"></i>
+          </span>
+          <span class="file-label"> Choose a screenshot </span>
+        </span>
+        <span class="file-name"> Screen Shot 2017-07-29 at 15.54.25.png </span>
+      </label>
+    </div>
+    </br>
+  </div>
+
+  <section class="container">
+    </br>
+    <div class="box has-background-info"
+      style=" min-width: 200; min-height: 100; max-width: fit-content; max-height: fit-content;">
+      <canvas id="opencv-input"></canvas>
+      <canvas id="opencv-mask"></canvas>
+    </div>
+  </section>
+
+  </br>
+  </br>
+</body>
+
+</html>

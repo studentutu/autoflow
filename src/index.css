@@ -1,0 +1,59 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  padding-top: 20px;
+}
+
+#drop-zone {
+  width: 300px;
+  /* Adjust width as needed */
+  height: 150px;
+  /* Adjust height as needed */
+  margin: 50px auto;
+  /* Center the drop area */
+  border: 2px dashed #ccc;
+  /* Add a dashed border */
+  border-radius: 10px;
+  /* Rounded corners */
+  padding: 20px;
+  text-align: center;
+  /* Center content within the drop area */
+  display: flex;
+  /* Allow stacking elements vertically */
+  flex-direction: column;
+  /* Stack elements top to bottom */
+  justify-content: space-between;
+  /* Distribute elements with space between */
+  align-items: center;
+  /* Center elements horizontally */
+}
+
+#drop-zone span {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #333;
+  /* Text color */
+}
+
+#fileInput {
+  text-align: center;
+  /* Center content within the drop area */
+  display: flex;
+  /* Allow stacking elements vertically */
+  flex-direction: column;
+  /* Stack elements top to bottom */
+  justify-content: space-between;
+  /* Distribute elements with space between */
+  align-items: center;
+  /* Center elements horizontally */
+}
+
+
+.centered-container {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+}

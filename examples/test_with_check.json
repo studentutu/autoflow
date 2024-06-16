@@ -1,0 +1,42 @@
+{
+    "Steps": [
+        {
+            "Id": 0,
+            "Action": "wait",
+            "Wait": {
+                "Seconds": 1.0
+            }
+        },
+        {
+            "Id": 1,
+            "Action": "check",
+            "Check": {
+                "StateProperty": "CurrentTurn",
+                "Condition": "var < 2",
+                "IdWhenTrue": 2,
+                "IdWhenFalse": 3
+            }
+        },
+        {
+            "Id": 2,
+            "Action": "wait",
+            "Wait": {
+                "Seconds": 2.0
+            }
+        },
+        {
+            "Id": 3,
+            "Action": "finish"
+        }
+    ],
+    "State": {
+        "comment": "This is custom state variables, only boolean / numbers are supported.",
+        "BattlePhase": false,
+        "CurrentTurn": 1,
+        "MaxTurns": 9,
+        "IsInBattle": false,
+        "DetectedEnemyPosition": null,
+        "CurrentMoveVector": 0,
+        "MaxMoveRadius": 30
+    }
+}

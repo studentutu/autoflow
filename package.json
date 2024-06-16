@@ -1,0 +1,72 @@
+{
+  "name": "autoflow",
+  "productName": "autoflow",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": "src/index.js",
+  "scripts": {
+    "clean": "tsc --build --clean",
+    "build": "yarn clean && tsc",
+    "start": "yarn build && electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx .",
+    "cleancache": "yarn cache clean --force",
+    "cleanrebuild": "yarn cache clean --force && yarn install"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-rpm": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
+    "@electron-forge/maker-zip": "^7.4.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
+    "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron/fuses": "^1.8.0",
+    "@types/screenshot-desktop": "^1.12.3",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "css-loader": "^6.11.0",
+    "electron": "31.0.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "node-loader": "^2.0.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "keywords": [
+    "native",
+    "workflow",
+    "automation",
+    "pipeline",
+    "image-detection",
+    "OCR",
+    "opencv",
+    "input",
+    "autohotkey",
+    "autoclick",
+    "electron",
+    "json",
+    "steps",
+    "dragAndDrop",
+    "descktop",
+    "simulate",
+    "os",
+    "Electron",
+    "typescript"
+  ],
+  "author": {
+    "name": "studentutuDev",
+    "email": "studentutu@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@kirillvakalov/nut-tree__nut-js": "^4.2.1-2",
+    "electron-squirrel-startup": "^1.0.1",
+    "opencv4nodejs-prebuilt-install": "^4.1.202",
+    "screenshot-desktop": "^1.15.0"
+  }
+}

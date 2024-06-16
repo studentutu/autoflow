@@ -1,0 +1,55 @@
+{
+    "Steps": [
+        {
+            "Id": 0,
+            "Action": "wait",
+            "Wait": {
+                "Seconds": 1.0
+            }
+        },
+        {
+            "Id": 1,
+            "Action": "input",
+            "Input": {
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "clicks": 1
+            }
+        },
+        {
+            "Id": 2,
+            "Action": "wait",
+            "Wait": {
+                "Seconds": 2.0
+            }
+        },
+        {
+            "Id": 3,
+            "Action": "input",
+            "Input": {
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "clicks": 1,
+                "hold": 1.0
+            }
+        },
+        {
+            "Id": 4,
+            "Action": "finish"
+        }
+    ],
+    "State": {
+        "comment": "This is custom state variables, only boolean / numbers are supported.",
+        "BattlePhase": false,
+        "CurrentTurn": 1,
+        "MaxTurns": 9,
+        "IsInBattle": false,
+        "DetectedEnemyPosition": null,
+        "CurrentMoveVector": 0,
+        "MaxMoveRadius": 30
+    }
+}
