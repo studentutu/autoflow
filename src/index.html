@@ -7,76 +7,76 @@
   <title>AutoWorkflow</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" />
   <link rel="stylesheet" href="./index.css" />
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   <script defer src="./Renderer/renderer.js"></script>
 </head>
 
 <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">Welcome to AutoWorkflow!</h1>
 
-  <h1>Welcome to AutoWorkflow!</h1>
+      <div id="drop-zone" class="box">
+        <label for="fileInput">
+          <span>Drop File Here or Click to Select</span>
+          <input id="fileInput" type="file" accept=".json">
+        </label>
+      </div>
 
-  <div id="drop-zone">
-    <span>Drop File Here</span>
-    <input id="fileInput" type="file" accept=".json">
-  </div>
+      <button id="startBtn" class="button is-primary mt-5">Start</button>
+      <button id="stopBtn" class="button is-warning mt-5">Stop</button>
+      <br />
+      <span id="last-mouse-click">Last mouse click: </span>
 
-  <button id="startBtn" class="button is-primary">Start</button>
-  <button id="stopBtn" class="button is-warning">Stop</button>
-  </br>
-  <span id="last-mouse-click">Last mouse click: </span>
+      <br /><br /><br />
 
-  </br>
-  </br>
-  </br>
+      <section class="container">
+        <button id="opencv-btn" class="button is-danger">
+          Test OpenCV
+        </button>
+      </section>
 
-  <section class="container">
-    <button id="opencv-btn" class="button is-danger">
-      Test OpenCV
-    </button>
+      <br />
+      <!-- Container with both input zones -->
+      <section class="container is-flex is-justify-content-center">
+
+        <div class="box" style="flex: 1; margin: 0 10px;">
+          <div class="input-box">
+            <label for="targetFile">
+              <span>Drop Target File Here or Click to Select</span>
+              <input id="opencv-target" type="file" accept="image/*">
+            </label>
+            <div id="targetFileName" class="is-hidden">No file selected</div>
+          </div>
+        </div>
+
+        <div class="box" style="flex: 1; margin: 0 10px;">
+          <div class="input-box">
+            <label for="screenshotFile">
+              <span>Drop Screenshot Here or Click to Select</span>
+              <input id="opencv-screenshot" type="file" accept="image/*">
+            </label>
+            <div id="screenshotFileName" class="is-hidden">No file selected</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Container with both image target and final image based on the input screenshot -->
+      <br />
+      <section class="container canvas-container">
+        <div class="box has-background-info" style="flex: 1; margin: 10px;">
+          <canvas id="opencv-input"></canvas>
+        </div>
+        <div class="box has-background-info" style="flex: 1; margin: 10px;">
+          <canvas id="opencv-mask"></canvas>
+        </div>
+      </section>
+
+      <br /><br />
+    </div>
   </section>
 
-  </br>
-  <div class="container is-justify-content-center">
-    <div class="file is-boxed">
-      <label class="file-label">
-        <input id="opencv-target" class="file-input" type="file" />
-        <span class="file-cta">
-          <span class="file-icon">
-            <i class="fas fa-upload"></i>
-          </span>
-          <span class="file-label"> Choose a target </span>
-        </span>
-        <span class="file-name"> Screen Shot 2017-07-29 at 15.54.25.png </span>
-      </label>
-    </div>
-    </br>
-
-    </br>
-    <div class="file is-boxed">
-      <label class="file-label">
-        <input id="opencv-screenshot" class="file-input" type="file" />
-        <span class="file-cta">
-          <span class="file-icon">
-            <i class="fas fa-upload"></i>
-          </span>
-          <span class="file-label"> Choose a screenshot </span>
-        </span>
-        <span class="file-name"> Screen Shot 2017-07-29 at 15.54.25.png </span>
-      </label>
-    </div>
-    </br>
-  </div>
-
-  <section class="container">
-    </br>
-    <div class="box has-background-info"
-      style=" min-width: 200; min-height: 100; max-width: fit-content; max-height: fit-content;">
-      <canvas id="opencv-input"></canvas>
-      <canvas id="opencv-mask"></canvas>
-    </div>
-  </section>
-
-  </br>
-  </br>
 </body>
 
 </html>

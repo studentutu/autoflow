@@ -6,54 +6,67 @@ body {
   padding-top: 20px;
 }
 
-#drop-zone {
+#drop-zone,
+.input-box {
   width: 300px;
-  /* Adjust width as needed */
   height: 150px;
-  /* Adjust height as needed */
-  margin: 50px auto;
-  /* Center the drop area */
+  margin: 0 auto;
   border: 2px dashed #ccc;
-  /* Add a dashed border */
   border-radius: 10px;
-  /* Rounded corners */
   padding: 20px;
   text-align: center;
-  /* Center content within the drop area */
   display: flex;
-  /* Allow stacking elements vertically */
   flex-direction: column;
-  /* Stack elements top to bottom */
-  justify-content: space-between;
-  /* Distribute elements with space between */
+  justify-content: center;
   align-items: center;
-  /* Center elements horizontally */
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-#drop-zone span {
+#drop-zone:hover,
+.input-box:hover {
+  background-color: #f0f0f0;
+}
+
+#drop-zone span,
+.input-box span {
   font-weight: bold;
   font-size: 16px;
   margin-bottom: 10px;
   color: #333;
-  /* Text color */
+}
+
+#drop-zone label,
+.input-box label {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #fileInput {
-  text-align: center;
-  /* Center content within the drop area */
-  display: flex;
-  /* Allow stacking elements vertically */
-  flex-direction: column;
-  /* Stack elements top to bottom */
-  justify-content: space-between;
-  /* Distribute elements with space between */
-  align-items: center;
-  /* Center elements horizontally */
+  display: none;
 }
 
+.control {
+  width: 100%;
+  text-align: left;
+  margin-top: 10px;
+}
 
-.centered-container {
-  margin: 10px;
+/* Canvas container styles */
+.canvas-container {
   display: flex;
   justify-content: center;
+  align-items: center;
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+  flex: 1 1 45%;
+  /* Adjust the flex to handle responsiveness */
 }

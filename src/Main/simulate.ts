@@ -3,15 +3,7 @@ import { alert, debug, error } from './alert';
 import { Workflow } from "./WorkflowClass";
 import { InputDto, Vector2 } from "./Dtos";
 
-/*
-    const InputDto = {
-        position: x = 500, y = 300,
-        clicks: 1,
-        button: 'right', // Optional, defaults to 'left'
-        type: 'keyDown', // Optional for key presses, defaults to 'keyDown'
-        key: 'a' // Optional for key presses
-        };
-*/
+
 let undoAction: () => Promise<void>;
 
 // Function to simulate mouse clicks and key presses
@@ -204,7 +196,7 @@ export async function SimulateRobot(options: InputDto, context: Workflow) {
 exports.SimulateRobot = SimulateRobot;
 
 
-async function GetLastMouseClick() {
+export async function GetLastMouseClick() {
     const pos = await mouse.getPosition();
 
     return {
@@ -215,7 +207,7 @@ async function GetLastMouseClick() {
 
 exports.GetLastMouseClick = GetLastMouseClick;
 
-async function UndoInput() {
+export async function UndoInput() {
     if (undoAction !== undefined)
         await undoAction();
 }
