@@ -1,6 +1,5 @@
 import { Button, Key } from "@kirillvakalov/nut-tree__nut-js";
 
-
 export class WorkflowDto {
     State: JSON;
     Steps: StepDto[];
@@ -25,16 +24,78 @@ export class GoToDto {
     Id: number;
 }
 
+export class KeyboardInputDto {
+    /**
+     * Type for key presses.
+     * Defaults to 'keyDown' if not provided.
+     */
+    type: 'keyDown' | 'keyUp';
+
+    /** 
+     * Key to be pressed.
+     * Should correspond to a Key from @kirillvakalov/nut-tree__nut-js.
+     */
+    key: string;
+
+    /**
+     * Optional, if set, will simulate key/mouse down hold for specified seconds.
+     */
+    hold: number;
+
+    /**
+     * Optional property for whole sentence input.
+     */
+    sentence: string;
+}
+
+export class MouseInputDto {
+    /** 
+     * Use state property to determine if the mouse position should be taken from the state.
+     * Property used to determine whether to use the current mouse state. 
+     */
+    UseMouseStateProperty: string;
+
+    /** 
+     * Coordinates for mouse actions. 
+     * For example: {x: 200, y: 300} 
+     */
+    position: Vector2;
+
+    /**
+     * Number of mouse clicks.
+     * Defaults to one click if not provided.
+     */
+    clicks: number;
+
+    /**
+     * Optional, if set, will simulate key/mouse down hold for specified seconds.
+     */
+    hold: number;
+
+    /**
+     * Drag mouse to specified coordinates.
+     * Optional, defaults to false if not provided.
+     */
+    drag?: DragDto;
+
+    /**
+     * Mouse button to be used.
+     * Defaults to 'left' if not provided.
+     */
+    button: 'left' | 'middle' | 'right';
+}
+
+export class DragDto {
+    /**
+     * Coordinates for mouse drag actions. 
+     * For example: {x: 200, y: 300} 
+     */
+    delta: Vector2;
+}
 
 export class InputDto {
-    UseMouseStateProperty: string;
-    position: Vector2;
-    clicks: number;
-    hold: number; // Optional, if set, will simulate key/mouse down hold for specified seconds.
-    button: 'left' | 'middle' | 'right'; // Optional, defaults to 'left'
-    type: 'keyDown' | 'keyUp'; // Optional for key presses, defaults to 'keyDown'
-    key: string; // Optional for key presses
-    sentence: string; // Optional for whole sentence input
+    keyboardInput?: KeyboardInputDto;
+    mouseInput?: MouseInputDto;
 }
 
 export class DetectDto {

@@ -4,7 +4,7 @@ import { ConditionCheck } from './condition';
 import { Modify } from './modify';
 import { Workflow } from './WorkflowClass';
 import { StepDto } from './Dtos';
-import { SimulateRobot } from './simulate';
+import { SimulateInput } from './simulate';
 
 
 export class Step {
@@ -29,7 +29,7 @@ export class Step {
 
             case "input":
 
-                await SimulateRobot(jsonStep.Input, workflowContext);
+                await SimulateInput(jsonStep.Input, workflowContext);
                 break;
 
             case "check":
