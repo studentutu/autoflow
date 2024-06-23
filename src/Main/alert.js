@@ -38,10 +38,22 @@ export function displayLastMouseClick(msg) {
 exports.displayLastMouseClick = displayLastMouseClick;
 
 // For test purposes
-function renderScreenshotBase64(msg) {
+/*
+* Renders image data with canvas
+* @param 
+* imagDataWithCanvas: 
+* {
+*   canvasName: string,
+*   data: Uint8ClampedArray
+*   width: number,
+*   height: number
+* }
+*
+*/
+export function renderMaterial(imagDataWithCanvas) {
     if (activeWindow == undefined || activeWindow == null)
         activeWindow = BrowserWindow.getFocusedWindow();
 
-    activeWindow.webContents.send("on-render-base64-screenshot", msg);
+    activeWindow.webContents.send("render-material", imagDataWithCanvas);
 }
-exports.renderScreenshotBase64 = renderScreenshotBase64;
+exports.renderMaterial = renderMaterial;

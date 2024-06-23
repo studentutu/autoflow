@@ -28,14 +28,15 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "css-loader": "^6.11.0",
-    "electron": "31.0.1",
+    "electron": "~25.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "node-loader": "^2.0.0",
     "style-loader": "^3.3.4",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "electron-rebuild": "^3.2.9"
   },
   "keywords": [
     "native",
@@ -66,7 +67,7 @@
   "dependencies": {
     "@kirillvakalov/nut-tree__nut-js": "^4.2.1-2",
     "electron-squirrel-startup": "^1.0.1",
-    "opencv4nodejs-prebuilt-install": "^4.1.202",
+    "@dalongrong/opencv-wasm": "^4.8.1",
     "screenshot-desktop": "^1.15.0"
   }
 }

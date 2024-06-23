@@ -8,7 +8,7 @@ body {
 
 #drop-zone,
 .input-box {
-  width: 300px;
+  width: 40%;
   height: 150px;
   margin: 0 auto;
   border: 2px dashed #ccc;
@@ -34,6 +34,8 @@ body {
   font-size: 16px;
   margin-bottom: 10px;
   color: #333;
+  justify-content: center;
+  align-items: center;
 }
 
 #drop-zone label,
@@ -41,6 +43,7 @@ body {
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
 
@@ -55,7 +58,8 @@ body {
 }
 
 /* Canvas container styles */
-.canvas-container {
+.canvas-container,
+.both-inputs {
   display: flex;
   justify-content: center;
   align-items: center;

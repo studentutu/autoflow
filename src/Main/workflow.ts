@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { alert, debug, displayLastMouseClick } from './alert';
 import { Workflow } from './WorkflowClass';
 import { GetLastMouseClick } from './simulate';
+import * as TestOpenCv from './testopencv';
 
 let currentWorkflow: Workflow = null;
 
@@ -37,4 +38,22 @@ ipcMain.on("notify-button-click", async (event, arg) => {
 
   const position = await GetLastMouseClick();
   displayLastMouseClick(position);
+});
+
+ipcMain.on("check-opencv", (event, arg) => {
+
+  const testOpenCv = TestOpenCv.GetCurrentTest();
+  testOpenCv.CheckWithOpenCv();
+});
+
+ipcMain.on("change-target-image", (event, arg) => {
+
+  const test = TestOpenCv.GetCurrentTest();
+  test.ChangeTargetImage(arg);
+});
+
+ipcMain.on("change-screenshot-image", (event, arg) => {
+
+  const testOpenCv = TestOpenCv.GetCurrentTest();
+  testOpenCv.ChangeScreenshotImage(arg);
 });
