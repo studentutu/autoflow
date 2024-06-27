@@ -145,7 +145,18 @@ opencvScreenshotInput.addEventListener("change", function (event) {
     }
 });
 
-
+/*
+* Renders image data with canvas
+* @param 
+* imagDataWithCanvas: 
+* {
+*   canvasName: string,
+*   data: base64string,
+*   width: number,
+*   height: number
+* }
+*
+*/
 function renderMaterial({ canvasName, data, width, height }) {
 
     const bufferFromBase64 = Buffer.from(data, 'base64');

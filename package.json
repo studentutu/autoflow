@@ -24,6 +24,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron/fuses": "^1.8.0",
+    "@electron/rebuild": "^3.2.9",
     "@types/screenshot-desktop": "^1.12.3",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
@@ -35,8 +36,7 @@
     "style-loader": "^3.3.4",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "electron-rebuild": "^3.2.9"
+    "typescript": "^5.4.5"
   },
   "keywords": [
     "native",
@@ -60,14 +60,15 @@
     "typescript"
   ],
   "author": {
-    "name": "studentutuDev",
+    "name": "Roman Fedorov",
     "email": "studentutu@gmail.com"
   },
   "license": "MIT",
   "dependencies": {
     "@kirillvakalov/nut-tree__nut-js": "^4.2.1-2",
+    "@techstark/opencv-js": "^4.9.0-",
     "electron-squirrel-startup": "^1.0.1",
-    "@dalongrong/opencv-wasm": "^4.8.1",
+    "image-size": "^1.1.1",
     "screenshot-desktop": "^1.15.0"
   }
 }

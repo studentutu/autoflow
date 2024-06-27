@@ -44,7 +44,7 @@ exports.displayLastMouseClick = displayLastMouseClick;
 * imagDataWithCanvas: 
 * {
 *   canvasName: string,
-*   data: Uint8ClampedArray
+*   data: base64string,
 *   width: number,
 *   height: number
 * }
