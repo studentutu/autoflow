@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { app, BrowserWindow } = require('electron');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('node:path');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const workflowJs = require('./dist/Main/workflow');
+const test = require('./dist/Main/testopencv');
+const { alert, debug, error, renderMaterial } = require('./dist/Main/alert');
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -28,7 +29,17 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  test.TestOpenCvVersion();
 };
+
+process.on('uncaughtException', (error) => {
+  error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  error('Unhandled Rejection at:', p, 'reason:', reason);
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

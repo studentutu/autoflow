@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import * as openCv from "@techstark/opencv-js"
+import cv from "@techstark/opencv-js"
 import { alert, debug, error, renderMaterial } from './alert';
 import sd from 'screenshot-desktop';
 import sizeOf from "image-size";
+
 
 // import type * as openCV from './types/';
 // export type * as openCV from './types/';
@@ -31,11 +32,35 @@ export function SetTest(newTest: TestOpenCv) {
     currentTest = newTest;
 }
 
+export function TestOpenCvVersion() {
+
+    // await loadOpenCV();
+    // cv.setupOpenCv();
+
+    // setTimeout(() => {
+    try {
+
+        debug(cv.getAvailableBackends());
+        // cv.onRuntimeInitialized();
+
+
+        debug(cv.getVersionString());
+        debug("Build info: " + cv.getBuildInformation());
+        debug("Is using optimized: " + cv.useOptimized());
+
+    } catch (err) {
+        error(err);
+        // cv.exceptionFromPtr(err);
+    }
+
+    // }, 1000);
+}
+
 
 export class TestOpenCv {
 
-    ImageTargetMat: openCv.Mat;
-    ImageScreenshotMat: openCv.Mat;
+    ImageTargetMat: cv.Mat;
+    ImageScreenshotMat: cv.Mat;
 
     async ChangeTargetImage(stringImageAsBase64: string) {
         this.ImageTargetMat = await decodeBase64ToMatBgr(stringImageAsBase64);
@@ -50,6 +75,14 @@ export class TestOpenCv {
 
     async CheckWithOpenCv() {
 
+        try {
+            debug(cv.getVersionString());
+        } catch (err) {
+            error(err);
+            // cv.exceptionFromPtr(err);
+            return;
+        }
+
         if (this.ImageTargetMat === undefined || this.ImageTargetMat == null)
             return;
 
@@ -58,29 +91,29 @@ export class TestOpenCv {
 
         const copyForResult = this.ImageScreenshotMat.clone();
 
-        const kernelSize = new openCv.Size(3, 3);
+        const kernelSize = new cv.Size(3, 3);
 
         const cvTargetImage = this.ImageTargetMat;
         const cvScreenshot = this.ImageScreenshotMat;
-        openCv.cvtColor(cvTargetImage, cvTargetImage, openCv.COLOR_BGR2GRAY);
-        openCv.cvtColor(cvScreenshot, cvScreenshot, openCv.COLOR_BGR2GRAY);
+        cv.cvtColor(cvTargetImage, cvTargetImage, cv.COLOR_BGR2GRAY);
+        cv.cvtColor(cvScreenshot, cvScreenshot, cv.COLOR_BGR2GRAY);
 
-        openCv.GaussianBlur(cvTargetImage, cvTargetImage, kernelSize, 0);
-        openCv.GaussianBlur(cvScreenshot, cvScreenshot, kernelSize, 0);
+        cv.GaussianBlur(cvTargetImage, cvTargetImage, kernelSize, 0);
+        cv.GaussianBlur(cvScreenshot, cvScreenshot, kernelSize, 0);
 
 
 
         // TM_SQDIFF_NORMED - best min
         // TM_CCOEFF_NORMED - best max
-        const matchResult = new openCv.Mat();
-        openCv.matchTemplate(cvScreenshot, cvTargetImage, matchResult, openCv.TM_CCOEFF_NORMED);
+        const matchResult = new cv.Mat();
+        cv.matchTemplate(cvScreenshot, cvTargetImage, matchResult, cv.TM_CCOEFF_NORMED);
 
-        const result = openCv.minMaxLoc(matchResult, null);
+        const result = cv.minMaxLoc(matchResult, null);
         const minPoint = result.minLoc;
         const maxPoint = result.maxLoc;
 
-        const color = new openCv.Scalar(0, 255, 0, 255);
-        const rect = new openCv.Rect(maxPoint.x, maxPoint.y, cvTargetImage.cols, cvTargetImage.rows);
+        const color = new cv.Scalar(0, 255, 0, 255);
+        const rect = new cv.Rect(maxPoint.x, maxPoint.y, cvTargetImage.cols, cvTargetImage.rows);
 
         console.log("Min " + result.minVal);
         console.log("Max " + result.maxVal);
@@ -102,7 +135,7 @@ export class TestOpenCv {
     }
 
     // slow analog to opencv.getScoreMax(matchResultMaterial, threshold)
-    getScoreMax(material: openCv.Mat, confidence: number, targetMaterial: openCv.Mat): Array<MatchCoord> {
+    getScoreMax(material: cv.Mat, confidence: number, targetMaterial: cv.Mat): Array<MatchCoord> {
 
         const width = targetMaterial.cols;
         const height = targetMaterial.rows;
@@ -149,14 +182,14 @@ export class MatchCoord {
         return `${this.x}x${this.y} confidence:${this.value}`;
     }
 
-    draw(mat: openCv.Mat) {
+    draw(mat: cv.Mat) {
         // const rect = new cv.Rect(this.x, this.y, this.width, this.height);
 
-        const color = new openCv.Scalar(0, 255, 0, 255);
-        const startPoint = new openCv.Point(this.x, this.y);
-        const endPoint = new openCv.Point(this.x + this.width, this.y + this.height);
+        const color = new cv.Scalar(0, 255, 0, 255);
+        const startPoint = new cv.Point(this.x, this.y);
+        const endPoint = new cv.Point(this.x + this.width, this.y + this.height);
 
-        openCv.rectangle(mat, startPoint, endPoint, color, 2, openCv.LINE_8, 0);
+        cv.rectangle(mat, startPoint, endPoint, color, 2, cv.LINE_8, 0);
         // mat.drawRectangle(rect, color, 2);
     }
 }
@@ -181,8 +214,8 @@ async function makeScreenshotBuffer() {
  * @param region search region
  * @returns a list of matchs
  */
-export function getScoreMaxOpenCv4Node(scoreMat: openCv.Mat, threshold: number, region?: openCv.Rect): Array<[number, number, number]> {
-    if (scoreMat.type !== openCv.CV_32F)
+export function getScoreMaxOpenCv4Node(scoreMat: cv.Mat, threshold: number, region?: cv.Rect): Array<[number, number, number]> {
+    if (scoreMat.type !== cv.CV_32F)
         throw Error('this method can only be call on a CV_32F Mat');
     if (scoreMat.dims !== 2)
         throw Error('this method can only be call on a 2 dimmention Mat');
@@ -223,7 +256,7 @@ export function getScoreMaxOpenCv4Node(scoreMat: openCv.Mat, threshold: number, 
  * @param matches list of matches as a list in [x,y,score]. (this data will be altered)
  * @returns best match without colisions
  */
-export function dropOverlappingZone(template: openCv.Mat, matches: Array<[number, number, number]>): Array<[number, number, number]> {
+export function dropOverlappingZone(template: cv.Mat, matches: Array<[number, number, number]>): Array<[number, number, number]> {
     const total = matches.length;
     const width = template.cols / 2;
     const height = template.rows / 2;
@@ -248,7 +281,7 @@ export function dropOverlappingZone(template: openCv.Mat, matches: Array<[number
 
 
 
-export async function decodeBase64ToMatBgr(base64String: string): Promise<openCv.Mat> {
+export async function decodeBase64ToMatBgr(base64String: string): Promise<cv.Mat> {
     const pngPrefix = 'data:image/jpeg;base64,';
     const jpgPrefix = 'data:image/png;base64,';
 
@@ -261,26 +294,26 @@ export async function decodeBase64ToMatBgr(base64String: string): Promise<openCv
         data: buffer,
         width: dimenstions.width,
         height: dimenstions.height
-    } as openCv.ImageData;
+    } as cv.ImageData;
 
-    return openCv.matFromImageData(imgData);
+    return cv.matFromImageData(imgData);
 }
 
-export async function renderImage(initialMat: openCv.Mat, canvas: string): Promise<void> {
+export async function renderImage(initialMat: cv.Mat, canvas: string): Promise<void> {
 
     if (initialMat.cols > 800) {
-        openCv.resize(initialMat, initialMat, new openCv.Size(0, 0), 0.5, 0.5, openCv.INTER_AREA);
+        cv.resize(initialMat, initialMat, new cv.Size(0, 0), 0.5, 0.5, cv.INTER_AREA);
         // initialMat = await initialMat.rescaleAsync(0.5);
     }
 
-    const matRGBA = new openCv.Mat();
+    const matRGBA = new cv.Mat();
     if (initialMat.channels() === 1) {
         // initialMat.cvtColor(opencv.COLOR_GRAY2RGBA) 
-        openCv.cvtColor(initialMat, matRGBA, openCv.COLOR_GRAY2RGBA);
+        cv.cvtColor(initialMat, matRGBA, cv.COLOR_GRAY2RGBA);
     }
     else {
         // initialMat.cvtColor(opencv.COLOR_BGR2RGBA);
-        openCv.cvtColor(initialMat, matRGBA, openCv.COLOR_BGR2RGBA);
+        cv.cvtColor(initialMat, matRGBA, cv.COLOR_BGR2RGBA);
     }
 
     debug("initialMat has channels " + initialMat.channels);

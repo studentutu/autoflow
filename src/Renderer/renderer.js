@@ -45,6 +45,7 @@ stopBtn.addEventListener('click', (event) => {
     ipcRenderer.send("stop-workflow");
 })
 
+
 //files: FileList
 function handleFiles(files) {
 
@@ -122,6 +123,14 @@ opencvTargetInput.addEventListener("change", function (event) {
         };
         reader.readAsDataURL(file);
     }
+});
+
+process.on('uncaughtException', (error) => {
+    console.error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
+});
+
+process.on('unhandledRejection', (reason, p) => {
+    console.error('Unhandled Rejection at:', p, 'reason:', reason);
 });
 
 opencvScreenshotInput.addEventListener("change", function (event) {

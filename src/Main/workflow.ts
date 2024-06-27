@@ -40,20 +40,20 @@ ipcMain.on("notify-button-click", async (event, arg) => {
   displayLastMouseClick(position);
 });
 
-ipcMain.on("check-opencv", (event, arg) => {
+ipcMain.on("check-opencv", async (event, arg) => {
 
   const testOpenCv = TestOpenCv.GetCurrentTest();
-  testOpenCv.CheckWithOpenCv();
+  await testOpenCv.CheckWithOpenCv();
 });
 
-ipcMain.on("change-target-image", (event, arg) => {
+ipcMain.on("change-target-image", async (event, arg) => {
 
   const test = TestOpenCv.GetCurrentTest();
-  test.ChangeTargetImage(arg);
+  await test.ChangeTargetImage(arg);
 });
 
-ipcMain.on("change-screenshot-image", (event, arg) => {
+ipcMain.on("change-screenshot-image", async (event, arg) => {
 
   const testOpenCv = TestOpenCv.GetCurrentTest();
-  testOpenCv.ChangeScreenshotImage(arg);
+  await testOpenCv.ChangeScreenshotImage(arg);
 });
