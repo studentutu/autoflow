@@ -2,7 +2,7 @@
   "name": "autoflow",
   "productName": "autoflow",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Automation for workflows with image detection and input simulation based on your custom json steps and state with support for a fully evaluated js expressions and js conditions.",
   "main": "src/index.js",
   "scripts": {
     "clean": "tsc --build --clean",
@@ -54,7 +54,7 @@
     "json",
     "steps",
     "dragAndDrop",
-    "descktop",
+    "desktop",
     "simulate",
     "os",
     "Electron",
