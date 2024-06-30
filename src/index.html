@@ -4,8 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AutoWorkflow</title>
-  <!-- Define electron opencv suitable no content security policy for the webview -->
+  <title>Autoflow</title>
+  <!-- Define recommended electron content security policy for the webview -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self';"> -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="*"> -->
+  <meta http-equiv="Access-Control-Allow-Origin" content="*">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" />
   <link rel="stylesheet" href="./index.css" />
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
@@ -15,17 +18,17 @@
 <body>
   <section class="section">
     <div class="container">
-      <h1 class="title">Welcome to AutoWorkflow!</h1>
+      <h1 class="title">Welcome to Autoflow!</h1>
 
       <div id="drop-zone" class="box">
         <label for="fileInput">
-          <span>Drop File Here or Click to Select</span>
+          <span>Drop autoflow.json File Here or Click to Select</span>
           <input id="fileInput" type="file" accept=".json">
         </label>
       </div>
 
-      <button id="startBtn" class="button is-primary mt-5">Start</button>
-      <button id="stopBtn" class="button is-warning mt-5">Stop</button>
+      <button id="startBtn" class="button is-primary mt-5">Start pipeline</button>
+      <button id="stopBtn" class="button is-warning mt-5">Stop pipeline</button>
       <br />
       <span id="last-mouse-click">Last mouse click: </span>
 
@@ -42,13 +45,13 @@
       <section class="container both-inputs is-flex is-justify-content-center">
 
         <div class="box input-box" style="flex: 1; margin: 0 10px;">
-          <span>Drop Target File Here or Select file</span>
+          <span>Drop Target image here or Select image</span>
           <input id="opencv-target" type="file" accept="image/*">
           <span id="targetFileName" class="is-hidden">No file selected</span>
         </div>
 
         <div class="box input-box" style="flex: 1; margin: 0 10px;">
-          <span>Drop Screenshot Here or Select file</span>
+          <span>Drop Screenshot image here or Select image</span>
           <input id="opencv-screenshot" type="file" accept="image/*">
           <span id="screenshotFileName" class="is-hidden">No file selected</span>
         </div>

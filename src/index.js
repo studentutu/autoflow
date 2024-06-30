@@ -2,7 +2,7 @@
 
 const { app, BrowserWindow } = require('electron');
 const path = require('node:path');
-const workflowJs = require('./dist/Main/workflow');
+const autoflow = require('./dist/Main/workflow');
 const test = require('./dist/Main/testopencv');
 const { alert, debug, error, renderMaterial } = require('./dist/Main/alert');
 
@@ -31,6 +31,9 @@ const createWindow = () => {
 
   test.TestOpenCvVersion();
 };
+
+// Disable security warnings
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 process.on('uncaughtException', (error) => {
   error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
