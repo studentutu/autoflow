@@ -232,7 +232,7 @@ npm run make
 - [ ] Graph design export into .json
 - [ ] Fetch action integration
 - [x] Use more reliable and feature rich key/mouse input simulation nut-js
-- [x] Use better opencv package ( so that there is no additional build or setup needed)
+- [x] Use better opencv package ( so that there is no additional build or setup needed). Used <https://www.npmjs.com/package/@u4/opencv4nodejs> with a lot of troubleshooting and fixes to make it work.
 - [ ] Multi screen support
 
 ## Contributions
