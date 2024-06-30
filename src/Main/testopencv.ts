@@ -4,6 +4,11 @@ import { alert, debug, error, renderMaterial } from './alert';
 import sd from 'screenshot-desktop';
 import sizeOf from "image-size";
 
+// This is main process.
+// Test if opencv is installed and working with TestOpenCvVersion().
+// import * as opencv from 'opencv-wasm-node';
+
+
 
 // import type * as openCV from './types/';
 // export type * as openCV from './types/';
@@ -11,6 +16,7 @@ import sizeOf from "image-size";
 //  * OpenCV Object
 //  */
 // export declare const cv: typeof openCV;
+// export default cv;
 // /**
 //  * Translate error number from OpenCV into a meaningful message
 //  * @param cvObject OpenCV object
@@ -37,23 +43,26 @@ export function TestOpenCvVersion() {
     // await loadOpenCV();
     // cv.setupOpenCv();
 
-    // setTimeout(() => {
-    try {
+    setTimeout(() => {
+        // THis will be called after 1 second.
 
-        debug(cv.getAvailableBackends());
-        // cv.onRuntimeInitialized();
+        // try {
+        //     debug('cv.build info' + opencv.cv.getBuildInformation());
+
+        //     debug(cv.getAvailableBackends());
 
 
-        debug(cv.getVersionString());
-        debug("Build info: " + cv.getBuildInformation());
-        debug("Is using optimized: " + cv.useOptimized());
+        //     debug(cv.getVersionString());
+        //     debug("Build info: " + cv.getBuildInformation());
+        //     debug("Is using optimized: " + cv.useOptimized());
 
-    } catch (err) {
-        error(err);
-        // cv.exceptionFromPtr(err);
-    }
+        // } catch (err) {
 
-    // }, 1000);
+        //     error(err);
+        //     error(cv.exceptionFromPtr(cv, err));
+        // }
+
+    }, 1000);
 }
 
 

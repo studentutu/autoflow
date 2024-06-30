@@ -6,13 +6,24 @@ Automate UI as never before.
 
 Powered by electron, robotjs an opencv.
 
-# Contents
+## Contents
 
 - [Installation](#installation)
-- [Workflow](#workflow)
+- [Workflow overview](#workflow-overview)
 - [Actions](#actions)
+  - [Wait Action, seconds as double/float/integer](#wait-action-seconds-as-doublefloatinteger)
+  - [Finish Action, which stops execution and finishes workflow](#finish-action-which-stops-execution-and-finishes-workflow)
+  - [Input Action](#input-action)
+  - [Detect image action](#detect-image-action)
+  - [Condition check action, check condition on value in custom state](#condition-check-action-check-condition-on-value-in-custom-state)
+  - [GoTo, go to step with specified id](#goto-go-to-step-with-specified-id)
+  - [Modify value in custom state](#modify-value-in-custom-state)
 - [Building](#building)
+  - [Pre-requisites](#pre-requisites)
+  - [Run](#run)
+  - [Package](#package)
 - [TODO](#todo)
+- [Contributions](#contributions)
 
 ## Installation
 
@@ -53,7 +64,7 @@ Your workflow will look something like this:
 
 ## Actions
 
-#### Wait Action, seconds as double/float/integer
+### Wait Action, seconds as double/float/integer
 
  ```json
     {
@@ -65,7 +76,7 @@ Your workflow will look something like this:
     }
 ```
 
-#### Finish Action, which stops execution and finishes workflow
+### Finish Action, which stops execution and finishes workflow
 
  ```json
     {
@@ -74,7 +85,7 @@ Your workflow will look something like this:
     }
 ```
 
-#### Input Action
+### Input Action
 
 ```json
    {
@@ -105,7 +116,7 @@ Your workflow will look something like this:
     }
 ```
 
-#### Detect image action
+### Detect image action
 
 ```json
    {
@@ -129,7 +140,7 @@ Your workflow will look something like this:
     }
 ```
 
-#### Condition check action, check condition on value in custom state
+### Condition check action, check condition on value in custom state
 
 ```json
    {
@@ -152,7 +163,7 @@ Your workflow will look something like this:
     }
 ```
 
-#### GoTo, go to step with specified id
+### GoTo, go to step with specified id
 
 ```json
    {
@@ -164,7 +175,7 @@ Your workflow will look something like this:
     }
 ```
 
-#### Modify value in custom state
+### Modify value in custom state
 
 ```json
    {
@@ -185,55 +196,45 @@ Your workflow will look something like this:
 
 ## Building
 
-#### Pre-requisites
+### Pre-requisites
 
-- make sure your git is setup to use long path (use cmd/bash/powershell to set it up)
+- nvm
+- node 20x
+- yarn
 
-```
-    git config --system core.longpaths true
-```
+Do a single restore of dependencies:
 
-- NVM and install node to a specified version
-  - Currently using Node v. 20.14.0
-- install yarn via (Chocolatey / Brew / apt)
-- re-install global node-gyp
-
-```
-    yarn install -g node-gyp
+```bash
+    yarn install 
 ```
 
-- when yarn/opencv/cmake and node-gyp are installed/re-installed, run project depedency resolver:
-
-```
-    yarn cleanrebuild
-```
-
-#### Run
+### Run
 
 Run:
 
-```
+``` bash
 yarn start
 ```
 
-#### Package
+### Package
 
 Run with command for each platform:
 npm run make
 
-# TODO
+## TODO
 
 - [x] String state property support
 - [x] Add Input hold into input action
-- [ ] Image template detection
+- [x] Image template detection
 - [ ] Packages for (linux /macos /windows)
 - [ ] Visualization graph tool
 - [ ] Workflow Graph design tool
 - [ ] Graph design export into .json
 - [ ] Fetch action integration
 - [x] Use more reliable and feature rich key/mouse input simulation nut-js
+- [x] Use better opencv package ( so that there is no additional build or setup needed)
 - [ ] Multi screen support
 
-# Contributions
+## Contributions
 
 Help to grow this project with your contributions.

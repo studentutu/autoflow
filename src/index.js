@@ -6,7 +6,6 @@ const workflowJs = require('./dist/Main/workflow');
 const test = require('./dist/Main/testopencv');
 const { alert, debug, error, renderMaterial } = require('./dist/Main/alert');
 
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();

@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { ipcRenderer } = require('electron');
 
+// This is render process.
+// Check if opencv is installed and working. Check with cliks on on opencv button.
+// const cv = require('opencv-wasm-node');
+
 const dropZone = document.getElementById('drop-zone');
 const input = document.getElementById('fileInput');
 const startBtn = document.getElementById('startBtn');
@@ -100,6 +104,13 @@ ipcRenderer.on("render-material", (event, imagDataWithCanvas) => {
 
 openCvButton.addEventListener("click", async function (event) {
     event.preventDefault(); // Prevent default form submission if applicable
+
+    // try {
+    //     console.log('cv.build info', cv.cv.getBuildInformation());
+    // } catch (err) {
+    //     console.error(err);
+    //     console.error(cv.cvTranslateError(cv, err));
+    // }
 
     ipcRenderer.send("check-opencv");
 });
