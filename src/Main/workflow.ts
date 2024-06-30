@@ -16,14 +16,14 @@ ipcMain.on("workflow-data", (event, stringJsonData) => {
 });
 
 
-ipcMain.on("start-workflow", (event, arg) => {
+ipcMain.on("start-workflow", async (event, arg) => {
 
   if (currentWorkflow == null || currentWorkflow.OriginalJsonString == null) {
     alert("Please load data!");
     return;
   }
 
-  currentWorkflow.Start();
+  await currentWorkflow.Start();
 });
 
 ipcMain.on("stop-workflow", (event, arg) => {

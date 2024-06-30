@@ -61,15 +61,19 @@
       <!-- Container with both image target and final image based on the input screenshot -->
       <br />
       <section class="container canvas-container">
-        <div class="box has-background-info" style="flex: 1; margin: 10px;">
+        <div class="box has-background-info">
           <canvas id="opencv-target-canvas"></canvas>
         </div>
-        <div class="box has-background-info" style="flex: 1; margin: 10px;">
+        <div class="box has-background-info">
           <canvas id="opencv-screenshot-canvas"></canvas>
         </div>
       </section>
 
       <br /><br />
+
+      <section class="hidden" style="display: none;">
+        <img id="image-targets" src="" />
+      </section>
     </div>
   </section>
 

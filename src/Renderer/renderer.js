@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { ipcRenderer } = require('electron');
+// const { imageSize } = require('image-size');
+// const cv = require("@techstark/opencv-js");
+// const Jimp = require('jimp');
 
 // This is render process.
 // Check if opencv is installed and working. Check with cliks on on opencv button.
@@ -14,6 +17,9 @@ const lastmouseclick = document.getElementById('last-mouse-click');
 const openCvButton = document.getElementById('opencv-btn');
 const opencvTargetInput = document.getElementById('opencv-target');
 const opencvScreenshotInput = document.getElementById('opencv-screenshot');
+const imageTargets = document.getElementById('image-targets');
+const canvasTarget = document.getElementById('opencv-target-canvas');
+const canvasScreenshot = document.getElementById('opencv-screenshot-canvas');
 
 dropZone.addEventListener('dragover', (event) => {
     event.preventDefault(); // Prevent default browser behavior
@@ -97,21 +103,15 @@ ipcRenderer.on("error", (event, message) => {
     console.error(message);
 });
 
-ipcRenderer.on("render-material", (event, imagDataWithCanvas) => {
-    renderMaterial(imagDataWithCanvas);
+ipcRenderer.on("render-material", async (event, imagDataWithCanvas) => {
+    await renderMaterial(imagDataWithCanvas);
 });
 
 
 openCvButton.addEventListener("click", async function (event) {
     event.preventDefault(); // Prevent default form submission if applicable
 
-    // try {
-    //     console.log('cv.build info', cv.cv.getBuildInformation());
-    // } catch (err) {
-    //     console.error(err);
-    //     console.error(cv.cvTranslateError(cv, err));
-    // }
-
+    // console.log('cv.build info' + cv.getBuildInformation());
     ipcRenderer.send("check-opencv");
 });
 
@@ -130,7 +130,7 @@ opencvTargetInput.addEventListener("change", function (event) {
         reader.onload = async () => {
             let uploadedImageBase64 = reader.result;
 
-            ipcRenderer.send("change-target-image", uploadedImageBase64);
+            await sendImageDataAsOpenCvData("change-target-image", uploadedImageBase64);
         };
         reader.readAsDataURL(file);
     }
@@ -159,11 +159,24 @@ opencvScreenshotInput.addEventListener("change", function (event) {
         reader.onload = async () => {
             let uploadedImagebase64 = reader.result;
 
-            ipcRenderer.send("change-screenshot-image", uploadedImagebase64);
+            await sendImageDataAsOpenCvData("change-screenshot-image", uploadedImagebase64);
         };
         reader.readAsDataURL(file);
     }
 });
+
+async function sendImageDataAsOpenCvData(stringTargetEvent, base64String) {
+
+    try {
+        const dataForOpenCv = {
+            base64String: base64String
+        };
+
+        ipcRenderer.send(stringTargetEvent, dataForOpenCv);
+    } catch (err) {
+        console.error(err);
+    }
+}
 
 /*
 * Renders image data with canvas
@@ -177,21 +190,35 @@ opencvScreenshotInput.addEventListener("change", function (event) {
 * }
 *
 */
-function renderMaterial({ canvasName, data, width, height }) {
+async function renderMaterial({ canvasName, data, width, height }) {
 
     const bufferFromBase64 = Buffer.from(data, 'base64');
     const canvas = document.getElementById(canvasName);
 
-    canvas.height = height;
     canvas.width = width;
-    const imgData = new ImageData(
-        new Uint8ClampedArray(bufferFromBase64),
-        width,
-        height
-    );
+    canvas.height = height;
+
+    const imageData = new ImageData(width, height);
+    imageData.data.set(bufferFromBase64);
+
     const ctx = canvas.getContext('2d');
 
-    // Can't draw if imgData.Buffer is on of size 4*width (RGBA).
-    // Make buffer for imgData is in RGBA!
-    ctx.putImageData(imgData, 0, 0);
+    // Can't draw if imgData.Buffer is not of size 4*width (RGBA).
+    // Make buffer for imgData in RGBA!
+    ctx.putImageData(imageData, 0, 0);
 }
+
+// async function CheckCvFromRenderer(data) {
+//     console.log("Size width" + data.width + "x height" + data.height);
+
+//     const pngPrefix = 'data:image/jpeg;base64,';
+//     const jpgPrefix = 'data:image/png;base64,';
+
+//     const base64Data = data.base64String.replace(pngPrefix, '').replace(jpgPrefix, '');
+//     const bufferFromBase64 = Buffer.from(base64Data, 'base64');
+
+//     var jimpSrc = await Jimp.read(bufferFromBase64);
+//     var mat = cv.matFromImageData(jimpSrc.bitmap);
+
+//     cv.imshow("opencv-target-canvas", mat);
+// }

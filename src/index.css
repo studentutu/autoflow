@@ -57,8 +57,6 @@ body {
   margin-top: 10px;
 }
 
-/* Canvas container styles */
-.canvas-container,
 .both-inputs {
   display: flex;
   justify-content: center;
@@ -69,8 +67,9 @@ body {
 }
 
 canvas {
+  min-height: 300px;
   max-width: 100%;
   height: auto;
-  flex: 1 1 45%;
+  /* flex: 1 1 45%; */
   /* Adjust the flex to handle responsiveness */
 }
