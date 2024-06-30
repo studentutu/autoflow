@@ -55,7 +55,7 @@ Your workflow will look something like this:
         }
     ],
      "State": {
-        "comment": "This is custom state variables, only boolean / numbers are supported.",
+        "comment": "This is custom state variables, all types are supported.",
         "CurrentMoveVector": 0,
         "MaxMoveRadius": 30
     }
