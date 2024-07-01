@@ -77,63 +77,75 @@ export class TestOpenCv {
 
     async CheckWithOpenCv() {
 
-        if (this.ImageTargetMat === undefined || this.ImageTargetMat == null)
-            return;
-
-        if (this.ImageScreenshotMat === undefined || this.ImageScreenshotMat == null)
-            return;
-
-        const copyForResult = this.ImageScreenshotMat.clone();
-
-        const kernelSize = new cv.Size(3, 3);
-
-        const cvTargetImage = this.ImageTargetMat;
-        const cvScreenshot = this.ImageScreenshotMat;
-        cv.cvtColor(cvTargetImage, cvTargetImage, cv.COLOR_BGR2GRAY);
-        cv.cvtColor(cvScreenshot, cvScreenshot, cv.COLOR_BGR2GRAY);
-
-        cv.GaussianBlur(cvTargetImage, cvTargetImage, kernelSize, 0);
-        cv.GaussianBlur(cvScreenshot, cvScreenshot, kernelSize, 0);
+        try {
 
 
-        // TM_SQDIFF_NORMED - best min
-        // TM_CCOEFF_NORMED - best max
-        const matchResult = new cv.Mat();
-        cv.matchTemplate(cvScreenshot, cvTargetImage, matchResult, cv.TM_CCOEFF_NORMED);
+            if (this.ImageTargetMat === undefined || this.ImageTargetMat == null)
+                return;
 
-        const result = cv.minMaxLoc(matchResult, null);
-        const minPoint = result.minLoc;
-        const maxPoint = result.maxLoc;
+            if (this.ImageScreenshotMat === undefined || this.ImageScreenshotMat == null)
+                return;
 
-        const color = new cv.Scalar(0, 255, 0, 255);
-        const rect = new cv.Rect(maxPoint.x, maxPoint.y, cvTargetImage.cols, cvTargetImage.rows);
+            const copyForResult = this.ImageScreenshotMat.clone();
 
-        debug("Min " + result.minVal);
-        debug("Max " + result.maxVal);
-        // copyForResult.drawRectangle(rect, color, 2);
+            const kernelSize = new cv.Size(3, 3);
 
-        // Set a threshold for a good match (adjust as needed)
-        const threshold = 0.8; // Experiment with different values
+            const cvTargetImage = this.ImageTargetMat;
+            const cvScreenshot = this.ImageScreenshotMat;
+            cv.cvtColor(cvTargetImage, cvTargetImage, cv.COLOR_BGR2GRAY);
+            cv.cvtColor(cvScreenshot, cvScreenshot, cv.COLOR_BGR2GRAY);
 
-        // Multiple matches
-        const matches1 = this.getScoreMax(matchResult, threshold, cvTargetImage);
-        debug("All matches " + matches1.length);
+            cv.GaussianBlur(cvTargetImage, cvTargetImage, kernelSize, 0);
+            cv.GaussianBlur(cvScreenshot, cvScreenshot, kernelSize, 0);
 
-        matches1.map(match => {
-            match.draw(copyForResult);
-        });
 
-        await renderImage(copyForResult, "opencv-screenshot-canvas");
-        copyForResult.delete();
+            // TM_SQDIFF_NORMED - best min
+            // TM_CCOEFF_NORMED - best max
+            const matchResult = new cv.Mat();
+            const matchedMask = new cv.Mat(cvTargetImage.rows, cvTargetImage.cols, cvTargetImage.type());
+
+            cv.matchTemplate(cvScreenshot, cvTargetImage, matchResult, cv.TM_CCOEFF_NORMED, matchedMask);
+
+            // const result = cv.minMaxLoc(matchResult, null);
+            // const minPoint = result.minLoc;
+            // const maxPoint = result.maxLoc;
+
+            const color = new cv.Scalar(0, 255, 0, 255);
+            // const rect = new cv.Rect(maxPoint.x, maxPoint.y, cvTargetImage.cols, cvTargetImage.rows);
+
+            // const matchedCoordinate = new MatchCoord(maxPoint.x, maxPoint.y, result.maxVal, cvTargetImage.cols, cvTargetImage.rows);
+
+            // debug("Min " + result.minVal);
+            // debug("Max " + result.maxVal);
+            // matchedCoordinate.draw(copyForResult);
+
+            // Set a threshold for a good match (adjust as needed)
+            const threshold = 0.8; // Experiment with different values
+
+            // Multiple matches
+            const matches1 = this.getScoreMax(matchResult, threshold, cvTargetImage);
+            debug("All matches " + matches1.length);
+
+            matches1.map(match => {
+                match.draw(copyForResult);
+            });
+
+            await renderImage(copyForResult, "opencv-screenshot-canvas");
+
+            copyForResult.delete();
+            matchResult.delete();
+            matchedMask.delete();
+        } catch (err) {
+            error(err);
+        }
     }
 
-    // slow analog to opencv.getScoreMax(matchResultMaterial, threshold)
     getScoreMax(material: cv.Mat, confidence: number, targetMaterial: cv.Mat): Array<MatchCoord> {
 
         const width = targetMaterial.cols;
         const height = targetMaterial.rows;
 
-        // The same as: 
+        // The same as: opencv4nodejs
         // opencv.getScoreMax(matchResult, threshold)
         //     .map(m => new MatchCoord(m[0], m[1], m[2], cvTargetImage.cols, cvTargetImage.rows));
         // TODO: Reduce by using dropOverlappingZone
@@ -141,16 +153,15 @@ export class TestOpenCv {
 
         // const matches = [] as Array<MatchCoord>;
         // const data =  material.data;
-
         // for (let y = 0; y < material.rows; y++) {
         //     for (let x = 0; x < material.cols; x++) {
         //         const value = material.doubleAt(y, x);
-
         //         if (value >= confidence) {
         //             matches.push(new MatchCoord(x, y, value, width, height));
         //         }
         //     }
         // }
+
         return getScoreMaxOpenCv4Node(material, confidence)
             .map(m => new MatchCoord(m[0], m[1], m[2], width, height));
     }
@@ -202,24 +213,23 @@ async function makeScreenshotBuffer() {
  * Find values greater than threshold in a 32bit float matrix and return a list of matchs formated as [[x1, y1, score1]. [x2, y2, score2], [x3, y3, score3]]
  * add to be used with matchTemplate
  * non Natif code
- * @param scoreMat Matric containing scores as 32Bit float (CV_32F)
- * @param threshold Minimal score to collect
+ * @param scoreMat Matric containing scores
+ * @param threshold Minimal score to collect in range 0-1
  * @param region search region
  * @returns a list of matchs
  */
-export function getScoreMaxOpenCv4Node(scoreMat: cv.Mat, threshold: number, region?: cv.Rect): Array<[number, number, number]> {
-    if (scoreMat.type !== cv.CV_32F)
-        throw Error('this method can only be call on a CV_32F Mat');
-    if (scoreMat.dims !== 2)
-        throw Error('this method can only be call on a 2 dimmention Mat');
+export function getScoreMaxOpenCv4Node(nonNormalized: cv.Mat, threshold: number, region?: cv.Rect): Array<[number, number, number]> {
+    if (nonNormalized.dims !== 2)
+        throw Error('Custom: this method can only be call on a 2 dimmention Mat. Found ' + nonNormalized.dims);
 
     const out: Array<[number, number, number]> = [];
-    const { cols, rows } = scoreMat;
+    const { cols, rows } = nonNormalized;
 
-    // Data is in range 0-255
+    // Data value type is depends on the Mat type.
+    const scoreMat = NormalizedMaterialValues(nonNormalized);
     const raw = scoreMat.data;
-    debug("data is " + raw);
-    const thresholdToUse = threshold * 255;
+
+    debug("data type is " + scoreMat.type());
 
     let x1: number, x2: number, y1: number, y2: number;
     if (region) {
@@ -238,13 +248,23 @@ export function getScoreMaxOpenCv4Node(scoreMat: cv.Mat, threshold: number, regi
         let offset = (x1 + y * cols) * 4;
         for (let x = x1; x < x2; x++) {
             const value = raw.at(offset);
-            if (value >= thresholdToUse) {
+            if (value >= threshold) {
                 out.push([x, y, value]);
             }
             offset += 4;
         }
     }
+    scoreMat.delete();
     return out;
+}
+
+export function NormalizedMaterialValues(fromMat: cv.Mat): cv.Mat {
+
+    const mat = new cv.Mat(fromMat.rows, fromMat.cols, cv.CV_32F);
+
+    fromMat.convertTo(mat, cv.CV_32F);
+
+    return mat;
 }
 
 /**
@@ -285,6 +305,8 @@ export async function decodeBase64ToMatBgr(data: DataForOpenCv): Promise<cv.Mat>
     const base64Data = data.base64String.replace(pngPrefix, '').replace(jpgPrefix, '');
     const bufferFromBase64 = Buffer.from(base64Data, 'base64');
 
+    // opencv4nodejs -> uses direct imdecode (COLOR_BGR)
+    // Jimp -> uses image buffer (COLOR_RGBA)
     const jimpSrc = await Jimp.read(bufferFromBase64);
     const mat = cv.matFromImageData(jimpSrc.bitmap);
 
@@ -302,17 +324,17 @@ export async function renderImage(initialMat: cv.Mat, canvas: string): Promise<v
         debug("initialMat has channels " + initialMat.channels() + " colums " + initialMat.cols + " rows " + initialMat.rows + " type " + initialMat.type());
         if (initialMat.cols > 800) {
             cv.resize(matRGBA, matRGBA, new cv.Size(0, 0), 0.5, 0.5, cv.INTER_AREA);
-            // initialMat = await initialMat.rescaleAsync(0.5);
+            // matRGBA = await matRGBA.rescaleAsync(0.5);
         }
 
-
         if (matRGBA.channels() === 1) {
-            // initialMat.cvtColor(opencv.COLOR_GRAY2RGBA);
+            // matRGBA.cvtColor(opencv.COLOR_GRAY2RGBA);
             cv.cvtColor(matRGBA, matRGBA, cv.COLOR_GRAY2RGBA);
         }
         else {
-            // initialMat.cvtColor(opencv.COLOR_BGR2RGBA);
-            cv.cvtColor(matRGBA, matRGBA, cv.COLOR_BGR2RGBA);
+            // If using cv.imdecode from opencv4nodejs, so we need to convert from opencv4nodejs format (COLOR_BGR2RGBA)
+            // matRGBA.cvtColor(opencv.COLOR_BGR2RGBA);
+            // cv.cvtColor(matRGBA, matRGBA, cv.COLOR_BGR2RGBA);
         }
 
         debug("matRGBA " + matRGBA.channels() + " colums " + matRGBA.cols + " rows " + matRGBA.rows + " type " + matRGBA.type());
