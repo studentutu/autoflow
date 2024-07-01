@@ -5,7 +5,7 @@ const { ipcRenderer } = require('electron');
 // const Jimp = require('jimp');
 
 // This is render process.
-// Check if opencv is installed and working. Check with cliks on on opencv button.
+// Check if opencv is installed and working. Check with opencv button.
 // const cv = require('opencv-wasm-node');
 
 const dropZone = document.getElementById('drop-zone');
@@ -17,7 +17,6 @@ const lastmouseclick = document.getElementById('last-mouse-click');
 const openCvButton = document.getElementById('opencv-btn');
 const opencvTargetInput = document.getElementById('opencv-target');
 const opencvScreenshotInput = document.getElementById('opencv-screenshot');
-const imageTargets = document.getElementById('image-targets');
 const canvasTarget = document.getElementById('opencv-target-canvas');
 const canvasScreenshot = document.getElementById('opencv-screenshot-canvas');
 

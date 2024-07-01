@@ -23,7 +23,7 @@
       <div id="drop-zone" class="box">
         <label for="fileInput">
           <span>Drop autoflow.json File Here or Click to Select</span>
-          <input id="fileInput" type="file" accept=".json">
+          <input id="fileInput" class="any-input" type="file" accept=".json">
         </label>
       </div>
 
@@ -42,18 +42,20 @@
 
       <br />
       <!-- Container with both input zones -->
-      <section class="container both-inputs is-flex is-justify-content-center">
+      <section class="container both-inputs is-flex is-justify-content-center ">
 
-        <div class="box input-box" style="flex: 1; margin: 0 10px;">
-          <span>Drop Target image here or Select image</span>
-          <input id="opencv-target" type="file" accept="image/*">
-          <span id="targetFileName" class="is-hidden">No file selected</span>
+        <div class="box input-box">
+          <label for="fileInput">
+            <span>Drop Target image here or Select image</span>
+            <input id="opencv-target" class="any-input" type="file" accept="image/*">
+          </label>
         </div>
 
-        <div class="box input-box" style="flex: 1; margin: 0 10px;">
-          <span>Drop Screenshot image here or Select image</span>
-          <input id="opencv-screenshot" type="file" accept="image/*">
-          <span id="screenshotFileName" class="is-hidden">No file selected</span>
+        <div class="box input-box">
+          <label for="fileInput">
+            <span>Drop Screenshot image here or Select image</span>
+            <input id="opencv-screenshot" class="any-input" type="file" accept="image/*">
+          </label>
         </div>
 
       </section>
@@ -70,10 +72,6 @@
       </section>
 
       <br /><br />
-
-      <section class="hidden" style="display: none;">
-        <img id="image-targets" src="" />
-      </section>
     </div>
   </section>
 

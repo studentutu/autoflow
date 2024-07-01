@@ -47,7 +47,8 @@ body {
   align-items: center;
 }
 
-#fileInput {
+#fileInput,
+.any-input {
   display: none;
 }
 

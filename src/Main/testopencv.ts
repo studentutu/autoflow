@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import cv from "@techstark/opencv-js"
+import cv, { CV } from "@techstark/opencv-js"
 import { alert, debug, error, renderMaterial } from './alert';
 import sd from 'screenshot-desktop';
 import sizeOf from "image-size";
@@ -78,8 +78,6 @@ export class TestOpenCv {
     async CheckWithOpenCv() {
 
         try {
-
-
             if (this.ImageTargetMat === undefined || this.ImageTargetMat == null)
                 return;
 
@@ -90,43 +88,53 @@ export class TestOpenCv {
 
             const kernelSize = new cv.Size(3, 3);
 
-            const cvTargetImage = this.ImageTargetMat;
-            const cvScreenshot = this.ImageScreenshotMat;
-            cv.cvtColor(cvTargetImage, cvTargetImage, cv.COLOR_BGR2GRAY);
-            cv.cvtColor(cvScreenshot, cvScreenshot, cv.COLOR_BGR2GRAY);
+            const targetGray = new cv.Mat();
+            const screenshotGray = new cv.Mat();
+            // If using cv.imdecode from opencv4nodejs, so we need to convert from opencv4nodejs format (COLOR_BGR2GRAY)
+            // otherwise COLOR_RGBA2GRAY (Jimp)
+            cv.cvtColor(this.ImageTargetMat, targetGray, cv.COLOR_RGBA2GRAY);
+            cv.cvtColor(this.ImageScreenshotMat, screenshotGray, cv.COLOR_RGBA2GRAY);
 
-            cv.GaussianBlur(cvTargetImage, cvTargetImage, kernelSize, 0);
-            cv.GaussianBlur(cvScreenshot, cvScreenshot, kernelSize, 0);
 
+            const cvTargetImage = new cv.Mat();
+            const cvScreenshot = new cv.Mat();
+            cv.GaussianBlur(targetGray, cvTargetImage, kernelSize, 0);
+            cv.GaussianBlur(screenshotGray, cvScreenshot, kernelSize, 0);
+
+            targetGray.delete();
+            screenshotGray.delete();
 
             // TM_SQDIFF_NORMED - best min
             // TM_CCOEFF_NORMED - best max
             const matchResult = new cv.Mat();
-            const matchedMask = new cv.Mat(cvTargetImage.rows, cvTargetImage.cols, cvTargetImage.type());
+            const matchedMask = new cv.Mat();
+            // Set a threshold for a good match (adjust as needed)
+            const threshold = 0.8;
+            const color = new cv.Scalar(0, 255, 0, 255);
 
             cv.matchTemplate(cvScreenshot, cvTargetImage, matchResult, cv.TM_CCOEFF_NORMED, matchedMask);
+
+            await renderImage(cvTargetImage, "opencv-target-canvas");
+            // await renderImage(cvScreenshot, "opencv-screenshot-canvas");
+            // await renderImage(copyForResult, "opencv-screenshot-canvas");
 
             // const result = cv.minMaxLoc(matchResult, null);
             // const minPoint = result.minLoc;
             // const maxPoint = result.maxLoc;
 
-            const color = new cv.Scalar(0, 255, 0, 255);
             // const rect = new cv.Rect(maxPoint.x, maxPoint.y, cvTargetImage.cols, cvTargetImage.rows);
-
             // const matchedCoordinate = new MatchCoord(maxPoint.x, maxPoint.y, result.maxVal, cvTargetImage.cols, cvTargetImage.rows);
 
             // debug("Min " + result.minVal);
             // debug("Max " + result.maxVal);
             // matchedCoordinate.draw(copyForResult);
 
-            // Set a threshold for a good match (adjust as needed)
-            const threshold = 0.8; // Experiment with different values
-
             // Multiple matches
-            const matches1 = this.getScoreMax(matchResult, threshold, cvTargetImage);
-            debug("All matches " + matches1.length);
+            const matches = FastGetMatchedCoordinates(matchResult, cvTargetImage, threshold);
 
-            matches1.map(match => {
+            debug("All matches " + matches.length);
+
+            matches.map(match => {
                 match.draw(copyForResult);
             });
 
@@ -134,7 +142,8 @@ export class TestOpenCv {
 
             copyForResult.delete();
             matchResult.delete();
-            matchedMask.delete();
+            cvTargetImage.delete();
+            cvScreenshot.delete();
         } catch (err) {
             error(err);
         }
@@ -149,7 +158,6 @@ export class TestOpenCv {
         // opencv.getScoreMax(matchResult, threshold)
         //     .map(m => new MatchCoord(m[0], m[1], m[2], cvTargetImage.cols, cvTargetImage.rows));
         // TODO: Reduce by using dropOverlappingZone
-
 
         // const matches = [] as Array<MatchCoord>;
         // const data =  material.data;
@@ -213,23 +221,22 @@ async function makeScreenshotBuffer() {
  * Find values greater than threshold in a 32bit float matrix and return a list of matchs formated as [[x1, y1, score1]. [x2, y2, score2], [x3, y3, score3]]
  * add to be used with matchTemplate
  * non Natif code
- * @param scoreMat Matric containing scores
+ * @param nonNormalized Material containing scores
  * @param threshold Minimal score to collect in range 0-1
  * @param region search region
  * @returns a list of matchs
  */
 export function getScoreMaxOpenCv4Node(nonNormalized: cv.Mat, threshold: number, region?: cv.Rect): Array<[number, number, number]> {
-    if (nonNormalized.dims !== 2)
-        throw Error('Custom: this method can only be call on a 2 dimmention Mat. Found ' + nonNormalized.dims);
+    const scoreMat = NormalizedMaterialValues(nonNormalized);
+
+    if (scoreMat.dims !== 2)
+        throw Error('Custom: this method can only be call on a 2 dimmention Mat. Found ' + scoreMat.dims);
 
     const out: Array<[number, number, number]> = [];
     const { cols, rows } = nonNormalized;
 
     // Data value type is depends on the Mat type.
-    const scoreMat = NormalizedMaterialValues(nonNormalized);
     const raw = scoreMat.data;
-
-    debug("data type is " + scoreMat.type());
 
     let x1: number, x2: number, y1: number, y2: number;
     if (region) {
@@ -258,11 +265,53 @@ export function getScoreMaxOpenCv4Node(nonNormalized: cv.Mat, threshold: number,
     return out;
 }
 
+/**
+ * Fast match results using opencv binary thesholded material into rectangle contours, from matched material.
+ * Currently only support Max normalized match result (TM_CCOEFF_NORMED) and cv.THRESH_BINARY thresholding.
+ * @param matchResult multiple-channel, 8-bit or 32-bit floating point material 
+ * @param cvTargetImage template image material
+ * @param threshold value between 0 and 1.
+ * @returns a list of matched rectangles
+ */
+export function FastGetMatchedCoordinates(matchResult: cv.Mat, cvTargetImage: cv.Mat, threshold: number): Array<MatchCoord> {
+    const thresholded = new cv.Mat();
+
+    // TODO: Add support for other thresholding methods such as 
+    // cv.THRESH_BINARY requires additional max value.
+    // cv.THRESH_BINARY_INV requires additional max value.
+    // cv.THRESH_TRUNC
+    // cv.THRESH_TOZERO
+    // cv.THRESH_OTSU requires single channel material.
+    // cv.THRESH_TRIANGLE requires single channel material.
+
+    cv.threshold(matchResult, thresholded, threshold, 1, cv.THRESH_BINARY);
+    thresholded.convertTo(thresholded, cv.CV_8UC1);
+
+    const contours = new cv.MatVector();
+    const hierarchy = new cv.Mat();
+
+    const result = new Array<MatchCoord>();
+
+    // Requires binary images (thresholded)
+    cv.findContours(thresholded, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    for (let i = 0; i < contours.size(); ++i) {
+        const countour = contours.get(i).data32S; // Contains the points
+        const x = countour[0];
+        const y = countour[1];
+
+        result.push(new MatchCoord(x, y, 1, cvTargetImage.cols, cvTargetImage.rows));
+    }
+
+    thresholded.delete();
+
+    return result;
+}
+
 export function NormalizedMaterialValues(fromMat: cv.Mat): cv.Mat {
 
-    const mat = new cv.Mat(fromMat.rows, fromMat.cols, cv.CV_32F);
+    const mat = new cv.Mat();
 
-    fromMat.convertTo(mat, cv.CV_32F);
+    fromMat.convertTo(mat, cv.CV_32FC1);
 
     return mat;
 }
@@ -319,25 +368,32 @@ export async function decodeBase64ToMatBgr(data: DataForOpenCv): Promise<cv.Mat>
 export async function renderImage(initialMat: cv.Mat, canvas: string): Promise<void> {
 
     try {
-        const matRGBA = initialMat.clone();
+        let matRGBA: cv.Mat = null;
 
-        debug("initialMat has channels " + initialMat.channels() + " colums " + initialMat.cols + " rows " + initialMat.rows + " type " + initialMat.type());
-        if (initialMat.cols > 800) {
-            cv.resize(matRGBA, matRGBA, new cv.Size(0, 0), 0.5, 0.5, cv.INTER_AREA);
-            // matRGBA = await matRGBA.rescaleAsync(0.5);
-        }
+        debug("initial has channels " + initialMat.channels() + " colums " + initialMat.cols + " rows " + initialMat.rows + " type " + initialMat.type());
 
-        if (matRGBA.channels() === 1) {
+        if (initialMat.channels() === 1) {
+            const mat = new cv.Mat();
+
             // matRGBA.cvtColor(opencv.COLOR_GRAY2RGBA);
-            cv.cvtColor(matRGBA, matRGBA, cv.COLOR_GRAY2RGBA);
+            cv.cvtColor(initialMat, mat, cv.COLOR_GRAY2RGBA);
+
+            matRGBA = new cv.Mat();
+            mat.convertTo(matRGBA, cv.CV_8UC4);
+            mat.delete();
         }
         else {
+            matRGBA = initialMat.clone();
             // If using cv.imdecode from opencv4nodejs, so we need to convert from opencv4nodejs format (COLOR_BGR2RGBA)
             // matRGBA.cvtColor(opencv.COLOR_BGR2RGBA);
-            // cv.cvtColor(matRGBA, matRGBA, cv.COLOR_BGR2RGBA);
+            // cv.cvtColor(initialMat, matRGBA, cv.COLOR_BGR2RGBA);
         }
 
-        debug("matRGBA " + matRGBA.channels() + " colums " + matRGBA.cols + " rows " + matRGBA.rows + " type " + matRGBA.type());
+        if (initialMat.cols > 800) {
+            // matRGBA = await matRGBA.rescaleAsync(0.5);
+            cv.resize(matRGBA, matRGBA, new cv.Size(0, 0), 0.5, 0.5, cv.INTER_AREA);
+        }
+        debug("matRGBA channels " + matRGBA.channels() + " colums " + matRGBA.cols + " rows " + matRGBA.rows + " type " + matRGBA.type());
 
         const toBase64 = Buffer.from(matRGBA.data).toString('base64');
 
@@ -352,4 +408,109 @@ export async function renderImage(initialMat: cv.Mat, canvas: string): Promise<v
     } catch (err) {
         error(err);
     }
+}
+
+
+/** 
+    * From cv.CVDataType
+   export declare const CV_8U: CVDataType;
+   export declare const CV_8UC1: CVDataType;
+   export declare const CV_8UC2: CVDataType;
+   export declare const CV_8UC3: CVDataType;
+   export declare const CV_8UC4: CVDataType;
+   export declare const CV_8S: CVDataType;
+   export declare const CV_8SC1: CVDataType;
+   export declare const CV_8SC2: CVDataType;
+   export declare const CV_8SC3: CVDataType;
+   export declare const CV_8SC4: CVDataType;
+   export declare const CV_16U: CVDataType;
+   export declare const CV_16UC1: CVDataType;
+   export declare const CV_16UC2: CVDataType;
+   export declare const CV_16UC3: CVDataType;
+   export declare const CV_16UC4: CVDataType;
+   export declare const CV_16S: CVDataType;
+   export declare const CV_16SC1: CVDataType;
+   export declare const CV_16SC2: CVDataType;
+   export declare const CV_16SC3: CVDataType;
+   export declare const CV_16SC4: CVDataType;
+   export declare const CV_32S: CVDataType;
+   export declare const CV_32SC1: CVDataType;
+   export declare const CV_32SC2: CVDataType;
+   export declare const CV_32SC3: CVDataType;
+   export declare const CV_32SC4: CVDataType;
+   export declare const CV_32F: CVDataType;
+   export declare const CV_32FC1: CVDataType;
+   export declare const CV_32FC2: CVDataType;
+   export declare const CV_32FC3: CVDataType;
+   export declare const CV_32FC4: CVDataType;
+   export declare const CV_64F: CVDataType;
+   export declare const CV_64FC1: CVDataType;
+   export declare const CV_64FC2: CVDataType;
+   export declare const CV_64FC3: CVDataType;
+   export declare const CV_64FC4: CVDataType;
+    */
+function LogMaterialTypes() {
+
+    const types = [
+        cv.CV_8U, cv.CV_8UC1, cv.CV_8UC2, cv.CV_8UC3, cv.CV_8UC4,
+        cv.CV_8S, cv.CV_8SC1, cv.CV_8SC2, cv.CV_8SC3, cv.CV_8SC4,
+        cv.CV_16U, cv.CV_16UC1, cv.CV_16UC2, cv.CV_16UC3, cv.CV_16UC4,
+        cv.CV_16S, cv.CV_16SC1, cv.CV_16SC2, cv.CV_16SC3, cv.CV_16SC4,
+        cv.CV_32S, cv.CV_32SC1, cv.CV_32SC2, cv.CV_32SC3, cv.CV_32SC4,
+        cv.CV_32F, cv.CV_32FC1, cv.CV_32FC2, cv.CV_32FC3, cv.CV_32FC4,
+        cv.CV_64F, cv.CV_64FC1, cv.CV_64FC2, cv.CV_64FC3, cv.CV_64FC4
+    ];
+
+    const names = [
+        "CV_8U", "CV_8UC1", "CV_8UC2", "CV_8UC3", "CV_8UC4",
+        "CV_8S", "CV_8SC1", "CV_8SC2", "CV_8SC3", "CV_8SC4",
+        "CV_16U", "CV_16UC1", "CV_16UC2", "CV_16UC3", "CV_16UC4",
+        "CV_16S", "CV_16SC1", "CV_16SC2", "CV_16SC3", "CV_16SC4",
+        "CV_32S", "CV_32SC1", "CV_32SC2", "CV_32SC3", "CV_32SC4",
+        "CV_32F", "CV_32FC1", "CV_32FC2", "CV_32FC3", "CV_32FC4",
+        "CV_64F", "CV_64FC1", "CV_64FC2", "CV_64FC3", "CV_64FC4"
+    ];
+
+    types.forEach((type, index) => {
+        console.log(`Mat type ${names[index]}: ${type}`);
+    });
+}
+
+function getMaterialTypeMap() {
+    return new Map<number, cv.CVDataType>([
+        [0, 'CV_8U'],
+        [8, 'CV_8UC2'],
+        [16, 'CV_8UC3'],
+        [24, 'CV_8UC4'],
+        [1, 'CV_8S'],
+        [1, 'CV_8SC1'],
+        [9, 'CV_8SC2'],
+        [17, 'CV_8SC3'],
+        [25, 'CV_8SC4'],
+        [2, 'CV_16U'],
+        [2, 'CV_16UC1'],
+        [10, 'CV_16UC2'],
+        [18, 'CV_16UC3'],
+        [26, 'CV_16UC4'],
+        [3, 'CV_16S'],
+        [3, 'CV_16SC1'],
+        [11, 'CV_16SC2'],
+        [19, 'CV_16SC3'],
+        [27, 'CV_16SC4'],
+        [4, 'CV_32S'],
+        [4, 'CV_32SC1'],
+        [12, 'CV_32SC2'],
+        [20, 'CV_32SC3'],
+        [28, 'CV_32SC4'],
+        [5, 'CV_32F'],
+        [5, 'CV_32FC1'],
+        [13, 'CV_32FC2'],
+        [21, 'CV_32FC3'],
+        [29, 'CV_32FC4'],
+        [6, 'CV_64F'],
+        [6, 'CV_64FC1'],
+        [14, 'CV_64FC2'],
+        [22, 'CV_64FC3'],
+        [30, 'CV_64FC4'],
+    ]);
 }
