@@ -8,7 +8,6 @@ const { ipcRenderer } = require('electron');
 // Check if opencv is installed and working. Check with opencv button.
 // const cv = require('opencv-wasm-node');
 
-const dropZone = document.getElementById('drop-zone');
 const input = document.getElementById('fileInput');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -20,70 +19,14 @@ const opencvScreenshotInput = document.getElementById('opencv-screenshot');
 const canvasTarget = document.getElementById('opencv-target-canvas');
 const canvasScreenshot = document.getElementById('opencv-screenshot-canvas');
 
-dropZone.addEventListener('dragover', (event) => {
-    event.preventDefault(); // Prevent default browser behavior
-    dropZone.classList.add('dragover'); // Add a visual indication (optional)
+const dragAndDrop = document.querySelectorAll(".drag-drop-input");
+
+process.on('uncaughtException', (error) => {
+    console.error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
 });
 
-dropZone.addEventListener('drop', (event) => {
-    event.preventDefault();
-    const files = event.dataTransfer.files; // Get the dropped file
-    handleFiles(files); // Handle the dropped files (function explained later)
-    dropZone.classList.remove('dragover'); // Remove visual indication
-});
-
-input.addEventListener('change', (event) => {
-    event.preventDefault(); // Prevent default form submission if applicable
-
-    // const target = event.target as HTMLInputElement;
-    const files = event.target.files;
-    handleFiles(files); // Handle the dropped files (function explained later)
-    dropZone.classList.remove('dragover'); // Remove visual indication
-})
-
-
-startBtn.addEventListener('click', (event) => {
-    event.preventDefault(); // Prevent default form submission if applicable
-
-    ipcRenderer.send("start-workflow");
-})
-
-stopBtn.addEventListener('click', (event) => {
-    event.preventDefault(); // Prevent default form submission if applicable
-
-    ipcRenderer.send("stop-workflow");
-})
-
-
-//files: FileList
-function handleFiles(files) {
-
-    if (files.length == 0)
-        return;
-
-    const file = files[0]; // Get the dropped file
-
-    if (file.type !== 'application/json') {
-        alert('Please drop a JSON file only!');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-        const jsonStringData = reader.result;
-        // Do something with the parsed JSON data
-        console.log(jsonStringData);
-
-        ipcRenderer.send("workflow-data", jsonStringData);
-    };
-    reader.readAsText(file);
-}
-
-
-document.addEventListener("mousedown", function (event) {
-    // This function will be executed when the mouse is clicked
-    //  and will capture the click position
-    ipcRenderer.send("notify-button-click");
+process.on('unhandledRejection', (reason, p) => {
+    console.error('Unhandled Rejection at:', p, 'reason:', reason);
 });
 
 ipcRenderer.on("notify-button-click-ui", (event, position) => {
@@ -106,6 +49,49 @@ ipcRenderer.on("render-material", async (event, imagDataWithCanvas) => {
     await renderMaterial(imagDataWithCanvas);
 });
 
+dragAndDrop.forEach(el => {
+    // Explicitly use element as main event target
+    el.addEventListener('dragover', (event) => {
+        event.preventDefault(); // Prevent default browser behavior
+        el.classList.add('dragover'); // Add a visual indication (optional)
+        event.dataTransfer.dropEffect = 'copy'; // Indicate potential dropping
+    });
+
+    el.addEventListener('drop', (event) => {
+        event.preventDefault();
+        el.classList.remove('dragover'); // Remove visual indication
+        const files = event.dataTransfer.files;
+        const inputElement = el.querySelector('input');
+
+        // Clear any existing files from the input element
+        inputElement.value = '';
+
+        // Add the dropped files to the input element
+        inputElement.files = files;
+
+        // Dispatch the Change event on the input element underneath
+        inputElement.dispatchEvent(new Event('change'));
+    });
+});
+
+
+startBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevent default form submission if applicable
+
+    ipcRenderer.send("start-workflow");
+})
+
+stopBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevent default form submission if applicable
+
+    ipcRenderer.send("stop-workflow");
+})
+
+document.addEventListener("mousedown", function (event) {
+    // This function will be executed when the mouse is clicked
+    //  and will capture the click position
+    ipcRenderer.send("notify-button-click");
+});
 
 openCvButton.addEventListener("click", async function (event) {
     event.preventDefault(); // Prevent default form submission if applicable
@@ -113,6 +99,32 @@ openCvButton.addEventListener("click", async function (event) {
     // console.log('cv.build info' + cv.getBuildInformation());
     ipcRenderer.send("check-opencv");
 });
+
+input.addEventListener('change', (event) => {
+    event.preventDefault(); // Prevent default form submission if applicable
+
+    // const target = event.target as HTMLInputElement;
+    const files = event.target.files;
+    if (files.length == 0)
+        return;
+
+    const file = files[0]; // Get the dropped file
+
+    if (file.type !== 'application/json') {
+        alert('Please drop a JSON file only!');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const jsonStringData = reader.result;
+        // Do something with the parsed JSON data
+        console.log(jsonStringData);
+
+        ipcRenderer.send("workflow-data", jsonStringData);
+    };
+    reader.readAsText(file);
+})
 
 opencvTargetInput.addEventListener("change", function (event) {
     event.preventDefault(); // Prevent default form submission if applicable
@@ -135,13 +147,7 @@ opencvTargetInput.addEventListener("change", function (event) {
     }
 });
 
-process.on('uncaughtException', (error) => {
-    console.error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
-});
 
-process.on('unhandledRejection', (reason, p) => {
-    console.error('Unhandled Rejection at:', p, 'reason:', reason);
-});
 
 opencvScreenshotInput.addEventListener("change", function (event) {
     event.preventDefault(); // Prevent default form submission if applicable
@@ -182,10 +188,10 @@ async function sendImageDataAsOpenCvData(stringTargetEvent, base64String) {
 * @param 
 * imagDataWithCanvas: 
 * {
-*   canvasName: string,
-*   data: base64string,
-*   width: number,
-*   height: number
+*   canvasName: string - id of canvas element,
+*   data: base64string - encodes RGBA CV_8UC4 material,
+*   width: number - material colums,
+*   height: number - material rows
 * }
 *
 */
@@ -203,21 +209,5 @@ async function renderMaterial({ canvasName, data, width, height }) {
     const ctx = canvas.getContext('2d');
 
     // Can't draw if imgData.Buffer is not of size 4*width (RGBA).
-    // Make buffer for imgData in RGBA!
     ctx.putImageData(imageData, 0, 0);
 }
-
-// async function CheckCvFromRenderer(data) {
-//     console.log("Size width" + data.width + "x height" + data.height);
-
-//     const pngPrefix = 'data:image/jpeg;base64,';
-//     const jpgPrefix = 'data:image/png;base64,';
-
-//     const base64Data = data.base64String.replace(pngPrefix, '').replace(jpgPrefix, '');
-//     const bufferFromBase64 = Buffer.from(base64Data, 'base64');
-
-//     var jimpSrc = await Jimp.read(bufferFromBase64);
-//     var mat = cv.matFromImageData(jimpSrc.bitmap);
-
-//     cv.imshow("opencv-target-canvas", mat);
-// }

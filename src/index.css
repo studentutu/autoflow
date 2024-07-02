@@ -3,14 +3,14 @@ body {
   padding: 0;
   margin: 0;
   text-align: center;
-  padding-top: 20px;
+  /* padding-top: 20px; */
 }
 
 #drop-zone,
 .input-box {
-  width: 40%;
+  width: 80%;
   height: 150px;
-  margin: 0 auto;
+  margin: 5px auto;
   border: 2px dashed #ccc;
   border-radius: 10px;
   padding: 20px;
@@ -47,7 +47,6 @@ body {
   align-items: center;
 }
 
-#fileInput,
 .any-input {
   display: none;
 }
@@ -59,12 +58,10 @@ body {
 }
 
 .both-inputs {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
   max-width: 100%;
-  flex-wrap: wrap;
-  gap: 10px;
 }
 
 canvas {

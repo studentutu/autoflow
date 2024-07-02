@@ -20,7 +20,7 @@
     <div class="container">
       <h1 class="title">Welcome to Autoflow!</h1>
 
-      <div id="drop-zone" class="box">
+      <div id="drop-zone" class="box drag-drop-input">
         <label for="fileInput">
           <span>Drop autoflow.json File Here or Click to Select</span>
           <input id="fileInput" class="any-input" type="file" accept=".json">
@@ -42,16 +42,16 @@
 
       <br />
       <!-- Container with both input zones -->
-      <section class="container both-inputs is-flex is-justify-content-center ">
+      <section class="container both-inputs">
 
-        <div class="box input-box">
+        <div class="box input-box drag-drop-input">
           <label for="fileInput">
             <span>Drop Target image here or Select image</span>
             <input id="opencv-target" class="any-input" type="file" accept="image/*">
           </label>
         </div>
 
-        <div class="box input-box">
+        <div class="box input-box drag-drop-input">
           <label for="fileInput">
             <span>Drop Screenshot image here or Select image</span>
             <input id="opencv-screenshot" class="any-input" type="file" accept="image/*">

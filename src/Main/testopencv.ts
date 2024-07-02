@@ -372,22 +372,22 @@ export async function renderImage(initialMat: cv.Mat, canvas: string): Promise<v
 
         debug("initial has channels " + initialMat.channels() + " colums " + initialMat.cols + " rows " + initialMat.rows + " type " + initialMat.type());
 
+        let tempMat = new cv.Mat();
         if (initialMat.channels() === 1) {
-            const mat = new cv.Mat();
 
             // matRGBA.cvtColor(opencv.COLOR_GRAY2RGBA);
-            cv.cvtColor(initialMat, mat, cv.COLOR_GRAY2RGBA);
-
-            matRGBA = new cv.Mat();
-            mat.convertTo(matRGBA, cv.CV_8UC4);
-            mat.delete();
+            cv.cvtColor(initialMat, tempMat, cv.COLOR_GRAY2RGBA);
         }
         else {
-            matRGBA = initialMat.clone();
+            tempMat = initialMat.clone();
             // If using cv.imdecode from opencv4nodejs, so we need to convert from opencv4nodejs format (COLOR_BGR2RGBA)
             // matRGBA.cvtColor(opencv.COLOR_BGR2RGBA);
             // cv.cvtColor(initialMat, matRGBA, cv.COLOR_BGR2RGBA);
         }
+
+        matRGBA = new cv.Mat();
+        tempMat.convertTo(matRGBA, cv.CV_8UC4);
+        tempMat.delete();
 
         if (initialMat.cols > 800) {
             // matRGBA = await matRGBA.rescaleAsync(0.5);
