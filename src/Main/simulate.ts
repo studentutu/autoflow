@@ -3,7 +3,8 @@ import { alert, debug, error } from './alert';
 import { Workflow } from "./WorkflowClass";
 import { InputDto, Vector2, KeyboardInputDto, MouseInputDto } from "./Dtos";
 
-let undoAction: () => Promise<void>;
+let undoMouseAction: () => Promise<void>;
+let undoKeyboardAction: () => Promise<void>;
 
 export async function SimulateInput(options: InputDto, context: Workflow): Promise<void> {
     if (context.cancelled) {
@@ -110,8 +111,8 @@ async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): P
                 await mouse.pressButton(actualButton || Button.LEFT);
             }
 
-            undoAction = async function () {
-                undoAction = null;
+            undoMouseAction = async function () {
+                undoMouseAction = null;
                 if (mouseInput.clicks) {
                     await mouse.releaseButton(actualButton || Button.LEFT);
                 }
@@ -153,14 +154,14 @@ async function MoveMouseAsync(mouseInput: MouseInputDto, context: Workflow): Pro
     if (typeof delta.x !== 'number' || typeof delta.y !== 'number') {
         error('Invalid input drag: x and y must be numbers.');
         context.NextStep = -1;
-        undoAction();
+        UndoInput();
         return;
     }
 
     if (seconds !== undefined && typeof seconds !== 'number') {
         error('Invalid input drag: seconds must be a number.');
         context.NextStep = -1;
-        undoAction();
+        UndoInput();
         return;
     }
 
@@ -262,11 +263,11 @@ async function handleKeyboardInput(keyboardInput: KeyboardInputDto, context: Wor
                 await keyboard.pressKey(actualKey);
             }
 
-            undoAction = async function () {
+            undoKeyboardAction = async function () {
+                undoKeyboardAction = null;
                 if (actualKey) {
                     await keyboard.releaseKey(actualKey);
                 }
-                undoAction = null;
             };
 
             return new Promise<void>((resolve, _) => {
@@ -301,8 +302,11 @@ export async function GetLastMouseClick() {
 }
 
 export async function UndoInput() {
-    if (undoAction !== undefined) {
-        await undoAction();
+    if (undoKeyboardAction !== undefined && undoKeyboardAction !== null) {
+        await undoKeyboardAction();
+    }
+    if (undoMouseAction !== undefined && undoMouseAction !== null) {
+        await undoMouseAction();
     }
 }
 

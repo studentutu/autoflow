@@ -14,6 +14,8 @@ export class Workflow {
     NextStep: number;
     ScreenId: number;
     DisplaySize: Electron.Size;
+
+    // TODO: refactor use use AbortController instead of NodeJS.Timeout
     timeoutIds: NodeJS.Timeout[];
     currentStepIndex: number;
 

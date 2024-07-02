@@ -39,6 +39,7 @@ export class Step {
 
             case "detect":
 
+                // TODO: add detect action (based on opencv image template)
                 // await DetectImage(jsonStep.Detect, workflowContext);
                 break;
 
@@ -52,8 +53,8 @@ export class Step {
                 debug("Finished!");
                 break;
             default:
-                console.error("Bad action " + jsonStep.Id, actionAsString);
-                error("Bad action " + jsonStep.Id + " " + actionAsString);
+                console.error("Unknown action " + jsonStep.Id, actionAsString);
+                error("Unknown action " + jsonStep.Id + " " + actionAsString);
                 workflowContext.Stop();
                 return;
         }
