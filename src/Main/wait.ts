@@ -25,12 +25,13 @@ export async function Wait(waitJson: WaitDto, context: Workflow) {
     return new Promise<void>((resolve, reject) => {
         const timeoutId = setTimeout(() => {
             if (context.Cancelled) {
+                //TODO: Refactor to use AbortController
                 clearTimeout(timeoutId); // Clear timeout if cancelled during wait
                 resolve();
                 return;
             }
 
-            // Remove timeout when successful
+            // TODO: Refactor to use AbortController
             context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
             resolve();
         }, toMs);

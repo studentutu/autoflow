@@ -24,6 +24,12 @@ export async function SimulateInput(options: InputDto, context: Workflow): Promi
             await handleMouseInput(options.mouseInput, context);
         }
 
+        if (context.Cancelled) {
+            UndoInput();
+            context.NextStep = -1;
+            return;
+        }
+
         if (options.keyboardInput) {
             await handleKeyboardInput(options.keyboardInput, context);
         }
@@ -36,6 +42,7 @@ export async function SimulateInput(options: InputDto, context: Workflow): Promi
 async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): Promise<void> {
     let position: Vector2 = mouseInput.position;
     const mouseStateProperty = mouseInput.UseMouseStateProperty;
+
     if (mouseStateProperty !== undefined && Object.keys(context.State).includes(mouseStateProperty)) {
         const valueInState = context.State[mouseStateProperty];
         position = valueInState;
@@ -91,6 +98,12 @@ async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): P
             await straightTo(new Point(position.x, position.y));
         }
 
+        if (context.Cancelled) {
+            UndoInput();
+            context.NextStep = -1;
+            return;
+        }
+
         if (!useHold) {
             if (mouseInput.clicks) {
                 let repeat = mouseInput.clicks;
@@ -122,10 +135,12 @@ async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): P
                 const timeoutId = setTimeout(() => {
                     UndoInput();
                     if (context.Cancelled) {
+                        // TODO: Refactor to use AbortController
                         clearTimeout(timeoutId);
                         resolve();
                         return;
                     }
+                    // TODO: Refactor to use AbortController
                     context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
                     resolve();
                 }, toMs);
@@ -275,10 +290,12 @@ async function handleKeyboardInput(keyboardInput: KeyboardInputDto, context: Wor
                 const timeoutId = setTimeout(() => {
                     UndoInput();
                     if (context.Cancelled) {
+                        // TODO: Refactor to use AbortController
                         clearTimeout(timeoutId);
                         resolve();
                         return;
                     }
+                    // TODO: Refactor to use AbortController
                     context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
                     resolve();
                 }, toMs);
