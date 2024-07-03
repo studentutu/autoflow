@@ -52,6 +52,7 @@ export class Step {
 
                 debug("Finished!");
                 break;
+
             default:
                 console.error("Unknown action " + jsonStep.Id, actionAsString);
                 error("Unknown action " + jsonStep.Id + " " + actionAsString);

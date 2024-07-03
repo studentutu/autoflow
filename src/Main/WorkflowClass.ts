@@ -7,8 +7,6 @@ import { UndoInput } from './simulate';
 export class Workflow {
     // Original read-only data
     OriginalJsonString: string;
-    OriginalJsonState: string;
-    JsonData: WorkflowDto;
 
     // Mutable data
     NextStep: number;
@@ -17,6 +15,7 @@ export class Workflow {
     DisplaySize: Electron.Size;
 
     // Workflow state
+    JsonData: WorkflowDto;
     CurrentStepIndex: number;
     Running: boolean;
     Cancelled: boolean;
@@ -53,7 +52,6 @@ export class Workflow {
 
         this.JsonData = JSON.parse(this.OriginalJsonString);
         this.State = this.JsonData.State;
-        this.OriginalJsonState = JSON.stringify(this.JsonData.State);
 
         this.TimeoutIds = [];
         this.CurrentStepIndex = 0;
