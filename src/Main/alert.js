@@ -1,4 +1,3 @@
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { BrowserWindow } = require('electron');
 
@@ -43,10 +42,10 @@ exports.displayLastMouseClick = displayLastMouseClick;
 * @param 
 * imagDataWithCanvas: 
 * {
-*   canvasName: string,
-*   data: base64string,
-*   width: number,
-*   height: number
+*   canvasName: string = id of canvas element,
+*   data: base64string - encodes RGBA CV_8UC4 material,
+*   width: number - material colums,
+*   height: number - material rows
 * }
 *
 */

@@ -11,7 +11,7 @@ export class Step {
 
     static async Run(jsonStep: StepDto, workflowContext: Workflow) {
 
-        if (workflowContext.cancelled)
+        if (workflowContext.Cancelled)
             return;
 
         const actionAsString = jsonStep.Action.trim().toLowerCase();

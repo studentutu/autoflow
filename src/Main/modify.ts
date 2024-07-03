@@ -5,7 +5,7 @@ import { ModifyDto } from './Dtos';
 
 export function Modify(modifyJson: ModifyDto, context: Workflow) {
 
-    if (context.cancelled)
+    if (context.Cancelled)
         return;
 
     // Validate and handle potential errors

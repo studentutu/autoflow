@@ -4,7 +4,7 @@ import { WaitDto } from './Dtos';
 
 
 export async function Wait(waitJson: WaitDto, context: Workflow) {
-    if (context.cancelled) {
+    if (context.Cancelled) {
         return Promise.resolve();
     }
 
@@ -24,18 +24,18 @@ export async function Wait(waitJson: WaitDto, context: Workflow) {
 
     return new Promise<void>((resolve, reject) => {
         const timeoutId = setTimeout(() => {
-            if (context.cancelled) {
+            if (context.Cancelled) {
                 clearTimeout(timeoutId); // Clear timeout if cancelled during wait
                 resolve();
                 return;
             }
 
             // Remove timeout when successful
-            context.timeoutIds.splice(context.timeoutIds.indexOf(timeoutId), 1);
+            context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
             resolve();
         }, toMs);
 
-        context.timeoutIds.push(timeoutId);
+        context.TimeoutIds.push(timeoutId);
     });
 }
 

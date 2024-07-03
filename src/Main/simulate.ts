@@ -7,7 +7,7 @@ let undoMouseAction: () => Promise<void>;
 let undoKeyboardAction: () => Promise<void>;
 
 export async function SimulateInput(options: InputDto, context: Workflow): Promise<void> {
-    if (context.cancelled) {
+    if (context.Cancelled) {
         return Promise.resolve();
     }
 
@@ -121,16 +121,16 @@ async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): P
             const timeoutPromise = new Promise<void>((resolve, _) => {
                 const timeoutId = setTimeout(() => {
                     UndoInput();
-                    if (context.cancelled) {
+                    if (context.Cancelled) {
                         clearTimeout(timeoutId);
                         resolve();
                         return;
                     }
-                    context.timeoutIds.splice(context.timeoutIds.indexOf(timeoutId), 1);
+                    context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
                     resolve();
                 }, toMs);
 
-                context.timeoutIds.push(timeoutId);
+                context.TimeoutIds.push(timeoutId);
             });
 
             return Promise.race([MoveMouseAsync(mouseInput, context), timeoutPromise]);
@@ -174,7 +174,7 @@ async function MoveMouseAsync(mouseInput: MouseInputDto, context: Workflow): Pro
     let currentPoint = initialPosition;
 
     for (const point of points) {
-        if (context.cancelled) {
+        if (context.Cancelled) {
             UndoInput();
             return;
         }
@@ -182,7 +182,7 @@ async function MoveMouseAsync(mouseInput: MouseInputDto, context: Workflow): Pro
         currentPoint = point;
     }
 
-    if (context.cancelled) {
+    if (context.Cancelled) {
         UndoInput();
         return;
     }
@@ -274,16 +274,16 @@ async function handleKeyboardInput(keyboardInput: KeyboardInputDto, context: Wor
 
                 const timeoutId = setTimeout(() => {
                     UndoInput();
-                    if (context.cancelled) {
+                    if (context.Cancelled) {
                         clearTimeout(timeoutId);
                         resolve();
                         return;
                     }
-                    context.timeoutIds.splice(context.timeoutIds.indexOf(timeoutId), 1);
+                    context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
                     resolve();
                 }, toMs);
 
-                context.timeoutIds.push(timeoutId);
+                context.TimeoutIds.push(timeoutId);
             });
         }
     } catch (err) {

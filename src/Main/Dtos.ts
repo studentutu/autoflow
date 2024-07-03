@@ -1,8 +1,9 @@
-import { Button, Key } from "@kirillvakalov/nut-tree__nut-js";
-
 export class WorkflowDto {
-    State: JSON;
+    // Read-only data
     Steps: StepDto[];
+
+    // Mutable data
+    State: JSON;
 }
 
 export class StepDto {

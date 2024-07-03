@@ -4,7 +4,7 @@ import { CheckDto } from './Dtos';
 
 export function ConditionCheck(conditionJson: CheckDto, context: Workflow) {
 
-    if (context.cancelled)
+    if (context.Cancelled)
         return;
 
     // Validate and handle potential errors

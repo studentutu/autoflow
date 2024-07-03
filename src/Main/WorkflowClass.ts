@@ -5,19 +5,23 @@ import { WorkflowDto } from './Dtos';
 import { UndoInput } from './simulate';
 
 export class Workflow {
+    // Original read-only data
     OriginalJsonString: string;
     OriginalJsonState: string;
     JsonData: WorkflowDto;
-    State: JSON;
-    Running: boolean;
-    cancelled: boolean;
+
+    // Mutable data
     NextStep: number;
+    State: JSON;
     ScreenId: number;
     DisplaySize: Electron.Size;
 
+    // Workflow state
+    CurrentStepIndex: number;
+    Running: boolean;
+    Cancelled: boolean;
     // TODO: refactor use use AbortController instead of NodeJS.Timeout
-    timeoutIds: NodeJS.Timeout[];
-    currentStepIndex: number;
+    TimeoutIds: NodeJS.Timeout[];
 
     constructor(jsonStringData: string) {
         this.OriginalJsonString = jsonStringData;
@@ -27,9 +31,9 @@ export class Workflow {
 
         debug("Cancelled");
 
-        this.cancelled = true;
-        while (this.timeoutIds.length > 0) {
-            const timeoutId = this.timeoutIds.pop();
+        this.Cancelled = true;
+        while (this.TimeoutIds.length > 0) {
+            const timeoutId = this.TimeoutIds.pop();
             if (timeoutId !== undefined)
                 clearTimeout(timeoutId);
         }
@@ -51,22 +55,22 @@ export class Workflow {
         this.State = this.JsonData.State;
         this.OriginalJsonState = JSON.stringify(this.JsonData.State);
 
-        this.timeoutIds = [];
-        this.currentStepIndex = 0;
+        this.TimeoutIds = [];
+        this.CurrentStepIndex = 0;
 
         debug("Started workflow!");
 
         this.Running = true;
-        this.cancelled = false;
+        this.Cancelled = false;
 
         try {
-            while (this.currentStepIndex > -1 && this.currentStepIndex < this.JsonData.Steps.length && !this.cancelled) {
-                const stepJson = this.JsonData.Steps[this.currentStepIndex];
+            while (this.CurrentStepIndex > -1 && this.CurrentStepIndex < this.JsonData.Steps.length && !this.Cancelled) {
+                const stepJson = this.JsonData.Steps[this.CurrentStepIndex];
 
-                this.NextStep = this.currentStepIndex + 1;
+                this.NextStep = this.CurrentStepIndex + 1;
                 await Step.Run(stepJson, this);
 
-                this.currentStepIndex = this.NextStep;
+                this.CurrentStepIndex = this.NextStep;
             }
         } catch (errorMsg) {
             console.error(errorMsg);
@@ -75,7 +79,7 @@ export class Workflow {
             this.Stop();
         }
 
-        if (!this.cancelled && this.currentStepIndex > -1) {
+        if (!this.Cancelled && this.CurrentStepIndex > -1) {
             console.log("Pipeline finished successfully");
             debug("Pipeline finished successfully");
         }
@@ -91,7 +95,7 @@ export class Workflow {
         if (!this.Running)
             return;
 
-        if (this.cancelled)
+        if (this.Cancelled)
             return;
 
         debug("Stopped");

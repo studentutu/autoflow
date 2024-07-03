@@ -1,2 +1,3 @@
 https://github.com/udarrr/TemplateMatcher/blob/develop/lib/handlers/invariantRotating.ts
 
+https://nodejs.org/dist/latest/docs/api/globals.html#globals_class_abortcontroller
