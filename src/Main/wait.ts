@@ -2,7 +2,6 @@ import { Workflow } from './WorkflowClass';
 import { alert, debug, error } from './alert';
 import { WaitDto } from './Dtos';
 
-
 export async function Wait(waitJson: WaitDto, context: Workflow) {
     if (context.Cancelled) {
         return Promise.resolve();
@@ -23,21 +22,34 @@ export async function Wait(waitJson: WaitDto, context: Workflow) {
     debug("In Wait " + JSON.stringify(waitJson));
 
     return new Promise<void>((resolve, reject) => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
         const timeoutId = setTimeout(() => {
+            const found = context.AbortControllers.indexOf(abortController);
+            if (found !== -1) {
+                context.AbortControllers.splice(found, 1);
+            }
             if (context.Cancelled) {
-                //TODO: Refactor to use AbortController
-                clearTimeout(timeoutId); // Clear timeout if cancelled during wait
+                clearTimeout(timeoutId);
                 resolve();
                 return;
             }
 
-            // TODO: Refactor to use AbortController
-            context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
             resolve();
         }, toMs);
 
-        context.TimeoutIds.push(timeoutId);
+        signal.addEventListener("abort", () => {
+            clearTimeout(timeoutId);
+            const found = context.AbortControllers.indexOf(abortController);
+            if (found !== -1) {
+                context.AbortControllers.splice(found, 1);
+            }
+            resolve();
+        }, { once: true });
+
+        context.AbortControllers.push(abortController);
     });
 }
 
-exports.Wait = Wait
+exports.Wait = Wait;

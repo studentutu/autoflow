@@ -19,27 +19,25 @@ export class Workflow {
     CurrentStepIndex: number;
     Running: boolean;
     Cancelled: boolean;
-    // TODO: refactor use use AbortController instead of NodeJS.Timeout
-    TimeoutIds: NodeJS.Timeout[];
+    AbortControllers: AbortController[];
 
     constructor(jsonStringData: string) {
         this.OriginalJsonString = jsonStringData;
     }
 
     cancelTimeouts() {
-
         debug("Cancelled");
 
         this.Cancelled = true;
-        while (this.TimeoutIds.length > 0) {
-            const timeoutId = this.TimeoutIds.pop();
-            if (timeoutId !== undefined)
-                clearTimeout(timeoutId);
+        while (this.AbortControllers.length > 0) {
+            const abortController = this.AbortControllers.pop();
+            if (abortController !== undefined && abortController != null) {
+                abortController.abort();
+            }
         }
     }
 
     async Start() {
-
         if (this.OriginalJsonString == null) {
             alert("Please load data!");
             return;
@@ -53,7 +51,7 @@ export class Workflow {
         this.JsonData = JSON.parse(this.OriginalJsonString);
         this.State = this.JsonData.State;
 
-        this.TimeoutIds = [];
+        this.AbortControllers = [];
         this.CurrentStepIndex = 0;
 
         debug("Started workflow!");
@@ -86,7 +84,6 @@ export class Workflow {
     }
 
     Stop() {
-
         if (this.OriginalJsonString == null)
             return;
 

@@ -107,8 +107,8 @@ async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): P
         if (!useHold) {
             if (mouseInput.clicks) {
                 let repeat = mouseInput.clicks;
-                mouse.config.autoDelayMs = 0;
-                while (repeat > 0) {
+                mouse.config.autoDelayMs = 5;
+                while (repeat > 0 && !context.Cancelled) {
                     repeat--;
                     await mouse.click(actualButton || Button.LEFT);
                 }
@@ -130,25 +130,39 @@ async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): P
                     await mouse.releaseButton(actualButton || Button.LEFT);
                 }
             };
+            const abortController = new AbortController();
+            const signal = abortController.signal;
 
             const timeoutPromise = new Promise<void>((resolve, _) => {
                 const timeoutId = setTimeout(() => {
                     UndoInput();
+                    const found = context.AbortControllers.indexOf(abortController);
+                    if (found !== -1) {
+                        context.AbortControllers.splice(found, 1);
+                    }
                     if (context.Cancelled) {
-                        // TODO: Refactor to use AbortController
                         clearTimeout(timeoutId);
                         resolve();
                         return;
                     }
-                    // TODO: Refactor to use AbortController
-                    context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
+
                     resolve();
                 }, toMs);
 
-                context.TimeoutIds.push(timeoutId);
+                signal.addEventListener("abort", () => {
+                    UndoInput();
+                    clearTimeout(timeoutId);
+                    const found = context.AbortControllers.indexOf(abortController);
+                    if (found !== -1) {
+                        context.AbortControllers.splice(found, 1);
+                    }
+                    resolve();
+                }, { once: true });
+
+                context.AbortControllers.push(abortController);
             });
 
-            return Promise.race([MoveMouseAsync(mouseInput, context), timeoutPromise]);
+            return Promise.race([MoveMouseAsync(mouseInput, context, timeoutPromise), timeoutPromise]);
         }
     } catch (err) {
         error('Error during mouse simulation: ' + err);
@@ -157,9 +171,9 @@ async function handleMouseInput(mouseInput: MouseInputDto, context: Workflow): P
     }
 }
 
-async function MoveMouseAsync(mouseInput: MouseInputDto, context: Workflow): Promise<void> {
+async function MoveMouseAsync(mouseInput: MouseInputDto, context: Workflow, setupTimeout: Promise<void>): Promise<void> {
     if (mouseInput.drag === undefined) {
-        return;
+        return setupTimeout;
     }
 
     const initialPosition = await mouse.getPosition();
@@ -257,13 +271,14 @@ async function handleKeyboardInput(keyboardInput: KeyboardInputDto, context: Wor
 
     try {
         if (!useHold) {
+            keyboard.config.autoDelayMs = 200;
             if (keyboardInput.type && actualKey) {
-                keyboard.config.autoDelayMs = null;
-                if (keyboardInput.type == "keyDown") {
-                    await keyboard.pressKey(actualKey);
-                } else {
-                    await keyboard.releaseKey(actualKey);
-                }
+                await keyboard.pressKey(actualKey);
+                await keyboard.releaseKey(actualKey);
+            }
+
+            if (context.Cancelled) {
+                return;
             }
 
             if (keyboardInput.sentence) {
@@ -273,6 +288,7 @@ async function handleKeyboardInput(keyboardInput: KeyboardInputDto, context: Wor
         } else {
             const seconds = keyboardInput.hold;
             const toMs = seconds * 1000;
+            keyboard.config.autoDelayMs = 0;
 
             if (actualKey) {
                 await keyboard.pressKey(actualKey);
@@ -286,21 +302,35 @@ async function handleKeyboardInput(keyboardInput: KeyboardInputDto, context: Wor
             };
 
             return new Promise<void>((resolve, _) => {
+                const abortController = new AbortController();
+                const signal = abortController.signal;
 
                 const timeoutId = setTimeout(() => {
                     UndoInput();
+                    const found = context.AbortControllers.indexOf(abortController);
+                    if (found !== -1) {
+                        context.AbortControllers.splice(found, 1);
+                    }
                     if (context.Cancelled) {
-                        // TODO: Refactor to use AbortController
                         clearTimeout(timeoutId);
                         resolve();
                         return;
                     }
-                    // TODO: Refactor to use AbortController
-                    context.TimeoutIds.splice(context.TimeoutIds.indexOf(timeoutId), 1);
+
                     resolve();
                 }, toMs);
 
-                context.TimeoutIds.push(timeoutId);
+                signal.addEventListener("abort", () => {
+                    UndoInput();
+                    clearTimeout(timeoutId);
+                    const found = context.AbortControllers.indexOf(abortController);
+                    if (found !== -1) {
+                        context.AbortControllers.splice(found, 1);
+                    }
+                    resolve();
+                }, { once: true });
+
+                context.AbortControllers.push(abortController);
             });
         }
     } catch (err) {
